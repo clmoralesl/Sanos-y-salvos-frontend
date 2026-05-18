@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sanos-salvos-frontend
+    restart: always
+    ports:
+      - "3000:80"
+    # Nota: No depende de api-gateway aquí porque en repos separados 
+    # se asume que el backend está corriendo en su propio entorno o puerto.
