@@ -119,6 +119,7 @@ const AdminReporteDetalle = () => {
                 <div className="bg-slate-900 text-green-400 p-4 rounded-lg font-mono text-xs overflow-x-auto">
                   <p>INDEX_H3: {detalle.ubicacion.codigoH3}</p>
                   <p>COORDINATES: [{detalle.ubicacion.latitud}, {detalle.ubicacion.longitud}]</p>
+                  <p>SPECIFIC_ADDR: {detalle.ubicacion.direccionEspecifica || 'N/A'}</p>
                   <p>LOCATION: {detalle.ubicacion.comuna}, {detalle.ubicacion.region}</p>
                 </div>
               </div>
@@ -130,10 +131,8 @@ const AdminReporteDetalle = () => {
               <h3 className="font-bold text-gray-800 uppercase tracking-wider text-xs">Entidad Mascota Asociada</h3>
             </div>
             <div className="p-6 flex items-start space-x-6">
-              <div className="w-32 h-32 bg-slate-100 rounded-lg flex-shrink-0 flex items-center justify-center text-slate-300">
-                {detalle.mascota.fotos?.length > 0 ? (
-                  <img src={detalle.mascota.fotos[0]} alt="Pet" className="w-full h-full object-cover rounded-lg" />
-                ) : '📷'}
+              <div className="w-32 h-32 bg-slate-100 rounded-lg flex-shrink-0 flex items-center justify-center text-slate-300 overflow-hidden">
+                <img src={localStorage.getItem(`report_photo_${id}`) || localStorage.getItem(`pet_photo_${detalle.mascota.id}`) || (detalle.mascota.fotos?.length > 0 ? detalle.mascota.fotos[0] : '/pet_placeholder.jpg')} alt="Pet" className="w-full h-full object-cover rounded-lg" />
               </div>
               <div className="flex-grow grid grid-cols-2 gap-4">
                 <div>
@@ -144,6 +143,30 @@ const AdminReporteDetalle = () => {
                   <p className="text-[10px] text-gray-400 font-bold uppercase">Raza / Especie</p>
                   <p className="text-sm font-medium">{detalle.mascota.raza} ({detalle.mascota.especie})</p>
                 </div>
+                <div>
+                  <p className="text-[10px] text-gray-400 font-bold uppercase">Color Primario</p>
+                  <p className="text-sm font-medium">{detalle.mascota.colorPrimario || 'No especificado'}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-gray-400 font-bold uppercase">Color Secundario</p>
+                  <p className="text-sm font-medium">{detalle.mascota.colorSecundario || 'Ninguno'}</p>
+                </div>
+                <div className="col-span-2">
+                  <p className="text-[10px] text-gray-400 font-bold uppercase">Tamaño</p>
+                  <p className="text-sm font-medium">{detalle.mascota.tamanio}</p>
+                </div>
+                {detalle.mascota.caracteristicas && detalle.mascota.caracteristicas.length > 0 && (
+                  <div className="col-span-2">
+                    <p className="text-[10px] text-gray-400 font-bold uppercase mb-1">Características (Tags)</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {detalle.mascota.caracteristicas.map((tag, idx) => (
+                        <span key={idx} className="px-2.5 py-1 bg-slate-100 text-slate-800 rounded-md text-xs font-bold border border-slate-200">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <div className="col-span-2">
                   <p className="text-[10px] text-gray-400 font-bold uppercase">Descripción en DB</p>
                   <p className="text-xs text-slate-600 italic">"{detalle.mascota.descripcion}"</p>

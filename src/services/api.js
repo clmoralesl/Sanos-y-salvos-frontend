@@ -9,9 +9,11 @@ const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
+    const userJson = localStorage.getItem('currentUser');
+    const auth0Id = userJson ? JSON.parse(userJson).id : 'auth0|local_dummy_001';
     config.headers = {
       ...config.headers,
-      'X-Auth0-Id': 'auth0|local_dummy_001'
+      'X-Auth0-Id': auth0Id
     };
     console.log('Petición saliente con headers:', config.headers);
     return config;

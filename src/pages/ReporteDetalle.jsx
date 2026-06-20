@@ -66,10 +66,8 @@ const ReporteDetalle = () => {
             </div>
             <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-4">
-                <div className="h-64 bg-gray-200 rounded-xl flex items-center justify-center text-gray-400">
-                  {detalle.mascota.fotos?.length > 0 ? (
-                    <img src={detalle.mascota.fotos[0]} alt="Mascota" className="h-full w-full object-cover rounded-xl" />
-                  ) : 'Sin fotografía'}
+                <div className="h-64 bg-gray-200 rounded-xl flex items-center justify-center text-gray-400 overflow-hidden">
+                  <img src={localStorage.getItem(`report_photo_${id}`) || localStorage.getItem(`pet_photo_${detalle.mascota.id}`) || (detalle.mascota.fotos?.length > 0 ? detalle.mascota.fotos[0] : '/pet_placeholder.jpg')} alt="Mascota" className="h-full w-full object-cover rounded-xl" />
                 </div>
               </div>
               <div className="space-y-4">
@@ -90,7 +88,29 @@ const ReporteDetalle = () => {
                     <p className="text-xs text-gray-400 uppercase font-bold tracking-wider">Tamaño</p>
                     <p className="text-lg font-medium text-gray-900">{detalle.mascota.tamanio}</p>
                   </div>
+                  <div>
+                    <p className="text-xs text-gray-400 uppercase font-bold tracking-wider">Color Primario</p>
+                    <p className="text-lg font-medium text-gray-900">{detalle.mascota.colorPrimario || 'No especificado'}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400 uppercase font-bold tracking-wider">Color Secundario</p>
+                    <p className="text-lg font-medium text-gray-900">{detalle.mascota.colorSecundario || 'Ninguno'}</p>
+                  </div>
                 </div>
+
+                {detalle.mascota.caracteristicas && detalle.mascota.caracteristicas.length > 0 && (
+                  <div className="pt-2">
+                    <p className="text-xs text-gray-400 uppercase font-bold tracking-wider mb-1.5">Características</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {detalle.mascota.caracteristicas.map((tag, idx) => (
+                        <span key={idx} className="px-2.5 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-bold">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <div className="pt-4">
                   <p className="text-xs text-gray-400 uppercase font-bold tracking-wider">Descripción</p>
                   <p className="text-gray-700 leading-relaxed italic">"{detalle.mascota.descripcion}"</p>
@@ -121,8 +141,11 @@ const ReporteDetalle = () => {
                 </Marker>
               </MapContainer>
             </div>
-            <div className="p-6 bg-blue-50 flex justify-between items-center text-sm">
-              <span className="text-blue-800 font-medium">{detalle.ubicacion.comuna}, {detalle.ubicacion.region}</span>
+            <div className="p-6 bg-blue-50 flex flex-col md:flex-row justify-between items-start md:items-center text-sm gap-2">
+              <div>
+                <p className="text-blue-900 font-black text-base">{detalle.ubicacion.direccionEspecifica || 'Sin dirección específica'}</p>
+                <p className="text-blue-700 text-xs mt-0.5">{detalle.ubicacion.comuna}, {detalle.ubicacion.region}</p>
+              </div>
               <span className="text-blue-600 font-mono text-xs">H3_CELL: {detalle.ubicacion.codigoH3}</span>
             </div>
           </section>
@@ -163,8 +186,55 @@ const ReporteDetalle = () => {
               </button>
             </div>
           </section>
-        </div>
       </div>
+    </div>
+
+    {detalle.coincidencias && detalle.coincidencias.length > 0 && (
+        <section className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100 p-6">
+          <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center">
+            <span className="text-2xl mr-2">✨</span>
+            Coincidencias Detectadas ({detalle.coincidencias.length})
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {detalle.coincidencias.map((coincidencia) => (
+              <div 
+                key={coincidencia.idReporte} 
+                className="bg-gray-50/50 rounded-xl p-4 border border-gray-100 flex flex-col justify-between hover:shadow-md transition duration-300"
+              >
+                <div>
+                  <div className="flex justify-between items-center mb-3">
+                    <span className="text-xs text-gray-500 font-mono">Reporte #{coincidencia.idReporte}</span>
+                    <span className={`px-2 py-1 rounded text-xs font-bold ${
+                      coincidencia.porcentajeSimilitud >= 70 ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
+                    }`}>
+                      {coincidencia.porcentajeSimilitud}% Similitud
+                    </span>
+                  </div>
+                  <div className="flex space-x-3">
+                    <div className="h-16 w-16 bg-gray-200 rounded-lg flex-shrink-0 flex items-center justify-center text-gray-400 overflow-hidden">
+                      <img src={localStorage.getItem(`report_photo_${coincidencia.idReporte}`) || ((coincidencia.fotos && coincidencia.fotos.length > 0) ? coincidencia.fotos[0] : '/pet_placeholder.jpg')} alt="Match" className="h-full w-full object-cover" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-gray-900">{coincidencia.nombreMascota}</h4>
+                      <p className="text-xs text-gray-600">{coincidencia.especie} • {coincidencia.raza}</p>
+                      <p className="text-xs text-gray-500 mt-1">📍 {coincidencia.direccionEspecifica ? `${coincidencia.direccionEspecifica}, ${coincidencia.comuna}` : `${coincidencia.comuna}, ${coincidencia.region}`}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-4 pt-3 border-t border-gray-100 flex justify-between items-center">
+                  <span className="text-[10px] text-gray-400 font-bold uppercase">{new Date(coincidencia.fechaIncidente).toLocaleDateString()}</span>
+                  <Link 
+                    to={`/reportes/${coincidencia.idReporte}`} 
+                    className="text-xs text-blue-600 font-bold hover:underline"
+                  >
+                    Ver Reporte →
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 };

@@ -1,7 +1,24 @@
-import React from 'react';
-import { Link, Outlet } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, Outlet, useNavigate } from 'react-router-dom';
 
 const PublicLayout = () => {
+  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const userJson = localStorage.getItem('currentUser');
+    if (userJson) {
+      setUser(JSON.parse(userJson));
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('currentUser');
+    setUser(null);
+    navigate('/login');
+    window.location.reload();
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <header className="bg-white shadow-sm">
@@ -10,10 +27,25 @@ const PublicLayout = () => {
             <Link to="/" className="text-2xl font-bold text-blue-600">Sanos y Salvos</Link>
           </div>
           <div className="flex items-center space-x-6">
+            {user && (
+              <div className="flex items-center space-x-3 text-sm">
+                <span className="bg-slate-100 text-slate-700 px-3 py-1.5 rounded-lg font-medium border border-gray-200">
+                  👤 {user.name} ({user.role === 'admin' ? 'Admin' : 'Normal'})
+                </span>
+                {user.role === 'admin' && (
+                  <Link to="/admin" className="text-gray-600 hover:text-blue-600 font-bold transition">
+                    Admin Panel
+                  </Link>
+                )}
+                <button
+                  onClick={handleLogout}
+                  className="text-red-500 hover:text-red-700 font-bold transition"
+                >
+                  Salir
+                </button>
+              </div>
+            )}
             <Link to="/reportar" className="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700 transition shadow-sm">Crear Reporte</Link>
-            <Link to="/admin" className="text-gray-500 hover:text-blue-600 text-sm font-medium transition flex items-center">
-              Admin
-            </Link>
           </div>
         </nav>
       </header>

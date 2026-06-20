@@ -1,1 +1,47 @@
 @import "tailwindcss";
+
+@theme {
+  --color-blue-50: #241e33;
+  --color-blue-100: #3a3052;
+  --color-blue-600: #ff758f;
+  --color-blue-700: #ff5c8a;
+}
+
+body {
+  background-color: #1a1625 !important;
+  color: #e6e6fa !important;
+}
+
+.bg-white {
+  background-color: #241e33 !important;
+}
+
+.bg-slate-50, .bg-gray-50, .bg-slate-100 {
+  background-color: #1a1625 !important;
+}
+
+.bg-blue-50 {
+  background-color: #2a223a !important;
+}
+
+.border-gray-100, .border-slate-100, .border-gray-200, .border-slate-200, .border-slate-50, .border-gray-50 {
+  border-color: #3a3052 !important;
+}
+
+.text-gray-900, .text-slate-900, .text-slate-800, .text-gray-800, .text-slate-700, .text-gray-700, .text-slate-600, .text-gray-600 {
+  color: #e6e6fa !important;
+}
+
+.text-gray-500, .text-slate-500, .text-gray-400, .text-slate-400 {
+  color: #9e97b5 !important;
+}
+
+input, select, textarea {
+  background-color: #1a1625 !important;
+  color: #e6e6fa !important;
+  border-color: #3a3052 !important;
+}
+
+input::placeholder, textarea::placeholder {
+  color: #776e8e !important;
+}
