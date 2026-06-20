@@ -7,7 +7,7 @@ import Button from '../components/Button';
 import MascotaForm from '../components/MascotaForm';
 import MapPicker from '../components/MapPicker';
 import Toast from '../components/Toast';
-import { registrarUbicacion, getUbicacionById, reverseGeocode } from '../services/geoService';
+import { registrarUbicacion, getUbicacionById, reverseGeocode, getRegiones, getComunasPorRegion } from '../services/geoService';
 
 const ReporteWizard = () => {
   const navigate = useNavigate();
@@ -34,6 +34,12 @@ const ReporteWizard = () => {
   const [mascotas, setMascotas] = useState([]);
   const [showNewMascotaForm, setShowNewMascotaForm] = useState(false);
 
+  const [regiones, setRegiones] = useState([]);
+  const [comunas, setComunas] = useState([]);
+  const [selectedRegion, setSelectedRegion] = useState('');
+  const [selectedCommune, setSelectedCommune] = useState('');
+  const [uploadedPhotoBase64, setUploadedPhotoBase64] = useState('');
+
   useEffect(() => {
     const h = hourPart.toString().padStart(2, '0');
     const m = minPart.toString().padStart(2, '0');
@@ -43,13 +49,18 @@ const ReporteWizard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [tipos, pets] = await Promise.all([getTiposReporte(), getMisMascotas()]);
+        const [tipos, pets, regionsList] = await Promise.all([
+          getTiposReporte(),
+          getMisMascotas(),
+          getRegiones()
+        ]);
         if (tipos && tipos.length > 0) {
           setTiposReporte(tipos);
         } else {
           setTiposReporte([{ id: 1, descripcion: 'Mascota Perdida' }, { id: 2, descripcion: 'Mascota Encontrada' }]);
         }
         setMascotas(pets);
+        setRegiones(regionsList || []);
       } catch (err) {
         setTiposReporte([{ id: 1, descripcion: 'Mascota Perdida' }, { id: 2, descripcion: 'Mascota Encontrada' }]);
       }
@@ -60,11 +71,36 @@ const ReporteWizard = () => {
   const handleNext = () => setStep(step + 1);
   const handleBack = () => setStep(step - 1);
 
+  const handleNextStep3 = () => {
+    const selectedDate = new Date(reportData.fechaIncidente);
+    const now = new Date();
+    if (selectedDate > now) {
+      setToast({ message: 'La fecha y hora del incidente no puede ser en el futuro.', type: 'error' });
+      return;
+    }
+    handleNext();
+  };
+
   const handleMascotaCreated = async (newMascotaData) => {
     try {
       setLoading(true);
-      const res = await createMascota(newMascotaData);
+      const base64Photo = newMascotaData.urlsFotografias?.[0] || '';
+      if (base64Photo) {
+        setUploadedPhotoBase64(base64Photo);
+      }
+
+      const payload = {
+        ...newMascotaData,
+        urlsFotografias: []
+      };
+
+      const res = await createMascota(payload);
       const createdPet = res.data || res; 
+
+      if (base64Photo && createdPet?.idMascota) {
+        localStorage.setItem(`pet_photo_${createdPet.idMascota}`, base64Photo);
+      }
+
       setMascotas(prev => [...prev, createdPet]);
       setReportData(prev => ({ ...prev, idMascota: createdPet.idMascota }));
       setShowNewMascotaForm(false);
@@ -77,23 +113,124 @@ const ReporteWizard = () => {
     }
   };
 
+  const cleanString = (str) => {
+    if (!str) return '';
+    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+  };
+
   const handleLocationSelect = async (coords) => {
     try {
       setLoading(true);
+      setReportData(prev => ({ ...prev, latitud: coords.lat, longitud: coords.lng, idUbicacionReporte: null }));
       const lookup = await reverseGeocode(coords.lat, coords.lng);
-      const resUbicacion = await registrarUbicacion(coords.lat, coords.lng, 1);
-      const idReal = resUbicacion.idUbicacion;
-      const detallesGeo = await getUbicacionById(idReal);
-      setGeoData({
-        ...detallesGeo,
-        displayComuna: lookup?.comuna || detallesGeo.comuna?.nombre,
-        displayRegion: lookup?.region || detallesGeo.comuna?.region?.nombre_region
-      });
-      setReportData(prev => ({ ...prev, idUbicacionReporte: idReal, latitud: coords.lat, longitud: coords.lng }));
+      
+      let matchedRegion = null;
+      let matchedCommune = null;
+
+      if (lookup) {
+        const cleanRegionName = cleanString(lookup.region);
+        matchedRegion = regiones.find(r => cleanString(r.nombre).includes(cleanRegionName) || cleanRegionName.includes(cleanString(r.nombre)));
+        
+        if (matchedRegion) {
+          setSelectedRegion(matchedRegion.id.toString());
+          const communesList = await getComunasPorRegion(matchedRegion.id);
+          setComunas(communesList || []);
+          
+          const cleanCommuneName = cleanString(lookup.comuna);
+          matchedCommune = communesList.find(c => cleanString(c.nombre).includes(cleanCommuneName) || cleanCommuneName.includes(cleanString(c.nombre)));
+          
+          if (matchedCommune) {
+            setSelectedCommune(matchedCommune.id.toString());
+            const resUbicacion = await registrarUbicacion(coords.lat, coords.lng, matchedCommune.id, lookup.direccionEspecifica);
+            const idReal = resUbicacion.idUbicacion;
+            setReportData(prev => ({ ...prev, idUbicacionReporte: idReal }));
+            
+            setGeoData({
+              idUbicacion: idReal,
+              latitud: coords.lat,
+              longitud: coords.lng,
+              comuna: {
+                id: matchedCommune.id,
+                nombre: matchedCommune.nombre,
+                region: {
+                  id: matchedRegion.id,
+                  nombre: matchedRegion.nombre
+                }
+              },
+              displayComuna: matchedCommune.nombre,
+              displayRegion: matchedRegion.nombre,
+              direccionEspecifica: lookup.direccionEspecifica
+            });
+            return;
+          }
+        }
+      }
+
+      setSelectedRegion('');
+      setSelectedCommune('');
+      setComunas([]);
+      setGeoData(null);
     } catch (err) {
       setToast({ message: 'Error al procesar ubicación', type: 'error' });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleRegionChange = async (regionId) => {
+    setSelectedRegion(regionId);
+    setSelectedCommune('');
+    setComunas([]);
+    setGeoData(null);
+    setReportData(prev => ({ ...prev, idUbicacionReporte: null }));
+    if (regionId) {
+      try {
+        const listComunas = await getComunasPorRegion(Number(regionId));
+        setComunas(listComunas || []);
+      } catch (err) {
+        setToast({ message: 'Error al cargar comunas', type: 'error' });
+      }
+    }
+  };
+
+  const handleCommuneChange = async (communeId) => {
+    setSelectedCommune(communeId);
+    setReportData(prev => ({ ...prev, idUbicacionReporte: null }));
+    setGeoData(null);
+    if (communeId && reportData.latitud && reportData.longitud) {
+      try {
+        setLoading(true);
+        const lookup = await reverseGeocode(reportData.latitud, reportData.longitud);
+        const dirEsp = lookup ? lookup.direccionEspecifica : 'Sin dirección específica';
+        const resUbicacion = await registrarUbicacion(reportData.latitud, reportData.longitud, Number(communeId), dirEsp);
+        const idReal = resUbicacion.idUbicacion;
+        
+        const regionObj = regiones.find(r => r.id === Number(selectedRegion));
+        const communeObj = comunas.find(c => c.id === Number(communeId));
+
+        setReportData(prev => ({ ...prev, idUbicacionReporte: idReal }));
+        setGeoData({
+          idUbicacion: idReal,
+          latitud: reportData.latitud,
+          longitud: reportData.longitud,
+          comuna: {
+            id: communeObj.id,
+            nombre: communeObj.nombre,
+            region: {
+              id: regionObj.id,
+              nombre: regionObj.nombre
+            }
+          },
+          displayComuna: communeObj.nombre,
+          displayRegion: regionObj.nombre,
+          direccionEspecifica: dirEsp
+        });
+        setToast({ message: 'Ubicación confirmada', type: 'success' });
+      } catch (err) {
+        setToast({ message: 'Error al registrar ubicación', type: 'error' });
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -106,7 +243,17 @@ const ReporteWizard = () => {
         idUbicacionReporte: Number(reportData.idUbicacionReporte),
         fechaIncidente: reportData.fechaIncidente
       };
-      await createReporte(payload);
+      const res = await createReporte(payload);
+      const createdReport = res.data || res;
+      const idReporte = createdReport?.idReporte || createdReport?.data?.idReporte;
+
+      if (idReporte) {
+        const photo = uploadedPhotoBase64 || localStorage.getItem(`pet_photo_${reportData.idMascota}`);
+        if (photo) {
+          localStorage.setItem(`report_photo_${idReporte}`, photo);
+        }
+      }
+
       setToast({ message: '¡Reporte publicado!', type: 'success' });
       setTimeout(() => navigate('/'), 1500);
     } catch (err) {
@@ -194,6 +341,7 @@ const ReporteWizard = () => {
                       <input
                         type="date"
                         value={datePart}
+                        max={new Date().toISOString().split('T')[0]}
                         onChange={(e) => setDatePart(e.target.value)}
                         className="w-full text-center text-2xl font-black text-slate-800 bg-transparent outline-none cursor-pointer"
                       />
@@ -250,7 +398,7 @@ const ReporteWizard = () => {
 
               <div className="flex justify-between pt-10 border-t border-slate-50">
                 <Button variant="secondary" onClick={handleBack}>&larr; Volver</Button>
-                <Button onClick={handleNext}>Continuar al Mapa &rarr;</Button>
+                <Button onClick={handleNextStep3}>Continuar al Mapa &rarr;</Button>
               </div>
             </div>
           )}
@@ -262,14 +410,53 @@ const ReporteWizard = () => {
                 <p className="text-slate-400 text-sm mt-2 font-medium">Marca el punto exacto del incidente en el mapa.</p>
               </div>
               <MapPicker onLocationSelect={handleLocationSelect} />
+              
+              {reportData.latitud && (
+                <div className="bg-white p-6 rounded-3xl border-2 border-slate-100 shadow-xl space-y-4 text-left">
+                  <h3 className="text-lg font-bold text-slate-800">Confirma la división administrativa</h3>
+                  <p className="text-xs text-slate-400">Verifica que la Región y Comuna correspondan a la ubicación en el mapa.</p>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-blue-600 uppercase tracking-wider ml-1">Región</label>
+                      <select
+                        value={selectedRegion}
+                        onChange={(e) => handleRegionChange(e.target.value)}
+                        className="w-full p-3 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-xl outline-none transition font-bold text-slate-800"
+                      >
+                        <option value="">-- Selecciona Región --</option>
+                        {regiones.map(r => (
+                          <option key={r.id} value={r.id}>{r.nombre}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-blue-600 uppercase tracking-wider ml-1">Comuna</label>
+                      <select
+                        value={selectedCommune}
+                        onChange={(e) => handleCommuneChange(e.target.value)}
+                        disabled={!selectedRegion}
+                        className="w-full p-3 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-xl outline-none transition font-bold text-slate-800 disabled:opacity-50"
+                      >
+                        <option value="">-- Selecciona Comuna --</option>
+                        {comunas.map(c => (
+                          <option key={c.id} value={c.id}>{c.nombre}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {geoData && (
                 <div className="bg-green-50 p-5 rounded-2xl border-2 border-green-100 flex items-center space-x-4">
                   <div className="bg-green-600 p-2 rounded-xl text-white">
                     <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /></svg>
                   </div>
-                  <div>
-                    <div className="font-black text-green-900 text-lg">{geoData.displayComuna}</div>
-                    <div className="text-[10px] font-bold text-green-600 uppercase tracking-widest">{geoData.displayRegion}</div>
+                  <div className="text-left">
+                    <div className="font-black text-green-900 text-lg">{geoData.direccionEspecifica || geoData.displayComuna}</div>
+                    <div className="text-[10px] font-bold text-green-600 uppercase tracking-widest">{geoData.displayComuna}, {geoData.displayRegion}</div>
                   </div>
                 </div>
               )}

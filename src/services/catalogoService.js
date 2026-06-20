@@ -21,3 +21,8 @@ export const getTiposReporte = async () => {
   const response = await api.get(`${PREFIX}/tipos-reporte`);
   return response.data;
 };
+
+export const getEspecies = async () => {
+  const response = await api.get(`${PREFIX}/especies`);
+  return response.data;
+};

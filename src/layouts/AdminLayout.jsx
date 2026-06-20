@@ -1,7 +1,21 @@
-import React from 'react';
-import { Link, Outlet } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Link, Outlet, useNavigate } from 'react-router-dom';
 
 const AdminLayout = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const userJson = localStorage.getItem('currentUser');
+    if (!userJson) {
+      navigate('/login');
+      return;
+    }
+    const user = JSON.parse(userJson);
+    if (user.role !== 'admin') {
+      navigate('/');
+    }
+  }, [navigate]);
+
   return (
     <div className="min-h-screen bg-gray-100 flex">
       

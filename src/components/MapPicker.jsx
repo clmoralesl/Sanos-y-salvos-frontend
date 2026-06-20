@@ -82,7 +82,7 @@ const MapPicker = ({ onLocationSelect }) => {
 
       <div className="h-[400px] w-full rounded-2xl overflow-hidden border-2 border-blue-100 shadow-md relative z-10">
         <MapContainer 
-          center={[-33.4489, -70.6693]} 
+          center={[-33.0245, -71.5518]} 
           zoom={13} 
           scrollWheelZoom={true}
           className="h-full w-full"
