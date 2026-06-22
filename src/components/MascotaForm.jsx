@@ -20,7 +20,7 @@ const MascotaForm = ({ initialData, onSubmit, onCancel, showNombreDesconocidoOpt
   const [allCaracteristicas, setAllCaracteristicas] = useState([]);
   const [selectedEspecie, setSelectedEspecie] = useState(initialData?.selectedEspecie || '');
   const [customEspecie, setCustomEspecie] = useState(initialData?.customEspecie || '');
-  const [searchTerm, setSearchQuery] = useState('');
+
   const [desconoceNombre, setDesconoceNombre] = useState(initialData?.desconoceNombre || formData.nombreMascota === 'Desconocido');
   const [tempNombre, setTempNombre] = useState('');
   const [isDragging, setIsDragging] = useState(false);
@@ -173,8 +173,7 @@ const MascotaForm = ({ initialData, onSubmit, onCancel, showNombreDesconocidoOpt
   };
 
   const filteredRazas = razas.filter(r => 
-    r.idEspecie === Number(selectedEspecie) &&
-    r.descripcion.toLowerCase().includes(searchTerm.toLowerCase())
+    r.idEspecie === Number(selectedEspecie)
   );
 
   return (
@@ -291,24 +290,15 @@ const MascotaForm = ({ initialData, onSubmit, onCancel, showNombreDesconocidoOpt
           {selectedEspecie && (
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700 font-bold">Raza</label>
-              <input
-                type="text"
-                placeholder="Buscar raza..."
-                value={searchTerm}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="block w-full border border-gray-200 rounded-t-lg p-2.5 text-sm bg-gray-50 focus:bg-white outline-none"
-              />
               <select
                 name="idRaza"
                 value={formData.idRaza}
                 onChange={handleChange}
-                size="4"
-                className="block w-full border border-t-0 border-gray-300 rounded-b-lg shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm overflow-y-auto bg-white"
+                className="block w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white"
                 required
               >
                 <option value="" disabled>Selecciona una raza</option>
                 {filteredRazas.map(r => <option key={r.id} value={r.id}>{r.descripcion}</option>)}
-                {filteredRazas.length === 0 && <option disabled>No se encontraron resultados</option>}
               </select>
             </div>
           )}
