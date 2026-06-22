@@ -11,7 +11,8 @@ const MascotaForm = ({ initialData, onSubmit, onCancel, showNombreDesconocidoOpt
     idRaza: initialData?.idRaza || '',
     idTamanio: initialData?.idTamanio || '',
     idsCaracteristicas: initialData?.idsCaracteristicas || [],
-    urlsFotografias: initialData?.urlsFotografias || []
+    urlsFotografias: initialData?.urlsFotografias || [],
+    edadAproximada: initialData?.edadAproximada || ''
   });
 
   const [razas, setRazas] = useState([]);
@@ -253,6 +254,22 @@ const MascotaForm = ({ initialData, onSubmit, onCancel, showNombreDesconocidoOpt
             ))}
           </select>
         </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 font-bold mb-1">Edad Aproximada</label>
+        <select
+          name="edadAproximada"
+          value={formData.edadAproximada}
+          onChange={handleChange}
+          required
+          className="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500 bg-white"
+        >
+          <option value="" disabled>Selecciona edad aproximada</option>
+          {['0-1 años', '1-3 años', '3-7 años', '7+ años'].map(e => (
+            <option key={e} value={e}>{e}</option>
+          ))}
+        </select>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

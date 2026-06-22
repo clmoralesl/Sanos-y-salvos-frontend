@@ -88,7 +88,7 @@ const Mascotas = () => {
       {loading ? (
         <div className="text-center py-10">Cargando mascotas...</div>
       ) : (
-        <Table headers={['ID', 'Nombre', 'Dueño', 'Raza', 'Tamaño', 'Acciones']}>
+        <Table headers={['ID', 'Nombre', 'Dueño', 'Raza', 'Tamaño', 'Edad Aprox.', 'Acciones']}>
           {mascotas.map((mascota) => (
             <tr key={mascota.idMascota}>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{mascota.idMascota}</td>
@@ -96,6 +96,7 @@ const Mascotas = () => {
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{mascota.nombreDueno || 'Sin Dueño'}</td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{mascota.nombreRaza || 'N/A'}</td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{mascota.descripcionTamanio || 'N/A'}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{mascota.edadAproximada || 'N/A'}</td>
               <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                 <button 
                   onClick={() => handleOpenModal(mascota)}
