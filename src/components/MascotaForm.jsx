@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 import Button from './Button';
 import { getRazas, getTamanios, getEspecies, getCaracteristicas } from '../services/catalogoService';
 
-const MascotaForm = ({ initialData, onSubmit, onCancel }) => {
+const MascotaForm = ({ initialData, onSubmit, onCancel, showNombreDesconocidoOption }) => {
   const [formData, setFormData] = useState({
     nombreMascota: initialData?.nombreMascota || '',
     descripcion: initialData?.descripcion || '',
     colorPrimario: initialData?.colorPrimario || '',
     colorSecundario: initialData?.colorSecundario || '',
-    idRaza: initialData?.idRaza || '', 
+    idRaza: initialData?.idRaza || '',
     idTamanio: initialData?.idTamanio || '',
     idsCaracteristicas: initialData?.idsCaracteristicas || [],
     urlsFotografias: initialData?.urlsFotografias || []
@@ -18,24 +18,68 @@ const MascotaForm = ({ initialData, onSubmit, onCancel }) => {
   const [especies, setEspecies] = useState([]);
   const [tamanios, setTamanios] = useState([]);
   const [allCaracteristicas, setAllCaracteristicas] = useState([]);
-  const [selectedEspecie, setSelectedEspecie] = useState('');
-  const [customEspecie, setCustomEspecie] = useState('');
+  const [selectedEspecie, setSelectedEspecie] = useState(initialData?.selectedEspecie || '');
+  const [customEspecie, setCustomEspecie] = useState(initialData?.customEspecie || '');
   const [searchTerm, setSearchQuery] = useState('');
-  const [previewUrl, setPreviewUrl] = useState(initialData?.urlsFotografias?.[0] || '');
+  const [desconoceNombre, setDesconoceNombre] = useState(initialData?.desconoceNombre || formData.nombreMascota === 'Desconocido');
+  const [tempNombre, setTempNombre] = useState('');
+  const [isDragging, setIsDragging] = useState(false);
+
+  const handleCheckboxChange = (e) => {
+    const checked = e.target.checked;
+    setDesconoceNombre(checked);
+    if (checked) {
+      setTempNombre(formData.nombreMascota);
+      setFormData(prev => ({ ...prev, nombreMascota: 'Desconocido' }));
+    } else {
+      setFormData(prev => ({ ...prev, nombreMascota: tempNombre || '' }));
+    }
+  };
+
+  const processFiles = (files) => {
+    const fileList = Array.from(files);
+    fileList.forEach(file => {
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setFormData(prev => ({
+            ...prev,
+            urlsFotografias: [...prev.urlsFotografias, reader.result]
+          }));
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      processFiles(e.dataTransfer.files);
+    }
+  };
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData(prev => ({
-          ...prev,
-          urlsFotografias: [reader.result]
-        }));
-        setPreviewUrl(reader.result);
-      };
-      reader.readAsDataURL(file);
+    if (e.target.files && e.target.files.length > 0) {
+      processFiles(e.target.files);
     }
+  };
+
+  const removePhoto = (indexToRemove) => {
+    setFormData(prev => ({
+      ...prev,
+      urlsFotografias: prev.urlsFotografias.filter((_, idx) => idx !== indexToRemove)
+    }));
   };
 
   useEffect(() => {
@@ -122,6 +166,8 @@ const MascotaForm = ({ initialData, onSubmit, onCancel }) => {
     }
     onSubmit({
       ...formData,
+      idRaza: formData.idRaza ? Number(formData.idRaza) : null,
+      idTamanio: formData.idTamanio ? Number(formData.idTamanio) : null,
       descripcion: finalDescription
     });
   };
@@ -135,15 +181,34 @@ const MascotaForm = ({ initialData, onSubmit, onCancel }) => {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <label className="block text-sm font-medium text-gray-700 font-bold mb-1">Nombre de la Mascota</label>
+        {showNombreDesconocidoOption && (
+          <p className="text-xs text-gray-500 mb-2 font-medium">
+            Si la mascota tiene placa con identificación, collar con datos o si conoces su nombre, regístralo aquí.
+          </p>
+        )}
         <input
           type="text"
           name="nombreMascota"
           value={formData.nombreMascota}
           onChange={handleChange}
-          required
-          placeholder="Ej: Bobby, Luna..."
-          className="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500 transition-all"
+          required={showNombreDesconocidoOption ? !desconoceNombre : true}
+          disabled={showNombreDesconocidoOption && desconoceNombre}
+          placeholder={showNombreDesconocidoOption && desconoceNombre ? "Desconocido" : "Ej: Bobby, Luna..."}
+          className={`mt-1 block w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500 transition-all ${
+            showNombreDesconocidoOption && desconoceNombre ? 'bg-gray-100 text-gray-500 cursor-not-allowed border-gray-200' : ''
+          }`}
         />
+        {showNombreDesconocidoOption && (
+          <label className="flex items-center space-x-2 mt-2 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={desconoceNombre}
+              onChange={handleCheckboxChange}
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <span className="text-sm text-gray-600 font-bold">Desconozco el nombre de la mascota</span>
+          </label>
+        )}
       </div>
 
       <div>
@@ -261,6 +326,7 @@ const MascotaForm = ({ initialData, onSubmit, onCancel }) => {
                   checked={Number(formData.idTamanio) === t.id}
                   onChange={() => setFormData({...formData, idTamanio: t.id})}
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500"
+                  required
                 />
                 <span className="text-sm text-gray-700">{t.descripcion}</span>
               </label>
@@ -323,24 +389,68 @@ const MascotaForm = ({ initialData, onSubmit, onCancel }) => {
       </div>
 
       <div className="space-y-2 border-t pt-4">
-        <label className="block text-sm font-medium text-gray-700 font-bold">Fotografía de la Mascota (Opcional)</label>
-        <div className="flex items-center space-x-4">
+        <label className="block text-sm font-medium text-gray-700 font-bold">Fotografías de la Mascota (Opcional)</label>
+        <div
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          onClick={() => document.getElementById('pet-photo-input').click()}
+          className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all ${
+            isDragging 
+              ? 'border-blue-500 bg-blue-50/50 scale-[1.01]' 
+              : 'border-slate-300 hover:border-blue-400 bg-slate-50 hover:bg-slate-100/50'
+          }`}
+        >
           <input
+            id="pet-photo-input"
             type="file"
             accept="image/*"
+            multiple
             onChange={handleFileChange}
-            className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"
+            className="hidden"
           />
-          {previewUrl && (
-            <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden border border-gray-200 flex-shrink-0">
-              <img src={previewUrl} alt="Vista previa" className="w-full h-full object-cover" />
-            </div>
-          )}
+          <div className="text-4xl mb-2">📸</div>
+          <p className="text-sm font-bold text-slate-700">Subir imágenes o arrastrar aquí</p>
+          <p className="text-xs text-slate-400 mt-1">Soporta múltiples imágenes (.jpg, .png)</p>
         </div>
+        {formData.urlsFotografias && formData.urlsFotografias.length > 0 && (
+          <div className="grid grid-cols-4 gap-3 pt-4">
+            {formData.urlsFotografias.map((photo, idx) => (
+              <div key={idx} className="relative group w-full h-24 bg-gray-50 rounded-xl overflow-hidden border border-slate-200 shadow-sm">
+                <img src={photo} className="w-full h-full object-cover" />
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removePhoto(idx);
+                  }}
+                  className="absolute top-1.5 right-1.5 bg-red-500 hover:bg-red-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-black transition-all shadow-md"
+                >
+                  &times;
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="flex justify-end space-x-3 pt-6 border-t mt-4">
-        <Button variant="secondary" onClick={onCancel}>Cancelar</Button>
+        <Button
+          variant="secondary"
+          onClick={(e) => {
+            e.preventDefault();
+            if (onCancel) {
+              onCancel({
+                ...formData,
+                selectedEspecie,
+                customEspecie,
+                desconoceNombre
+              });
+            }
+          }}
+        >
+          &larr; Volver atrás
+        </Button>
         <Button type="submit">Guardar Mascota</Button>
       </div>
     </form>
