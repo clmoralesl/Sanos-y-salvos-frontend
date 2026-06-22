@@ -39,6 +39,7 @@ const ReporteWizard = () => {
   const [selectedRegion, setSelectedRegion] = useState('');
   const [selectedCommune, setSelectedCommune] = useState('');
   const [uploadedPhotoBase64, setUploadedPhotoBase64] = useState('');
+  const [tempPetData, setTempPetData] = useState(null);
 
   useEffect(() => {
     const h = hourPart.toString().padStart(2, '0');
@@ -84,21 +85,26 @@ const ReporteWizard = () => {
   const handleMascotaCreated = async (newMascotaData) => {
     try {
       setLoading(true);
-      const base64Photo = newMascotaData.urlsFotografias?.[0] || '';
+      const petPhotos = newMascotaData.urlsFotografias || [];
+      const base64Photo = petPhotos[0] || '';
       if (base64Photo) {
         setUploadedPhotoBase64(base64Photo);
       }
 
       const payload = {
         ...newMascotaData,
-        urlsFotografias: []
+        urlsFotografias: petPhotos,
+        sinDueno: Number(reportData.idTipoReporte) === 2
       };
 
       const res = await createMascota(payload);
       const createdPet = res.data || res; 
 
-      if (base64Photo && createdPet?.idMascota) {
-        localStorage.setItem(`pet_photo_${createdPet.idMascota}`, base64Photo);
+      if (createdPet?.idMascota) {
+        if (petPhotos.length > 0) {
+          localStorage.setItem(`pet_photo_${createdPet.idMascota}`, petPhotos[0]);
+          localStorage.setItem(`pet_photos_${createdPet.idMascota}`, JSON.stringify(petPhotos));
+        }
       }
 
       setMascotas(prev => [...prev, createdPet]);
@@ -248,9 +254,19 @@ const ReporteWizard = () => {
       const idReporte = createdReport?.idReporte || createdReport?.data?.idReporte;
 
       if (idReporte) {
-        const photo = uploadedPhotoBase64 || localStorage.getItem(`pet_photo_${reportData.idMascota}`);
-        if (photo) {
-          localStorage.setItem(`report_photo_${idReporte}`, photo);
+        const petPhotosStr = localStorage.getItem(`pet_photos_${reportData.idMascota}`);
+        if (petPhotosStr) {
+          localStorage.setItem(`report_photos_${idReporte}`, petPhotosStr);
+          const firstPhoto = JSON.parse(petPhotosStr)[0];
+          if (firstPhoto) {
+            localStorage.setItem(`report_photo_${idReporte}`, firstPhoto);
+          }
+        } else {
+          const photo = uploadedPhotoBase64 || localStorage.getItem(`pet_photo_${reportData.idMascota}`);
+          if (photo) {
+            localStorage.setItem(`report_photo_${idReporte}`, photo);
+            localStorage.setItem(`report_photos_${idReporte}`, JSON.stringify([photo]));
+          }
         }
       }
 
@@ -280,7 +296,15 @@ const ReporteWizard = () => {
                 {tiposReporte.map((tipo) => (
                   <button
                     key={tipo.id}
-                    onClick={() => { setReportData({ ...reportData, idTipoReporte: tipo.id }); handleNext(); }}
+                    onClick={() => {
+                      setReportData({ ...reportData, idTipoReporte: tipo.id });
+                      if (tipo.id === 2) {
+                        setShowNewMascotaForm(true);
+                      } else {
+                        setShowNewMascotaForm(false);
+                      }
+                      handleNext();
+                    }}
                     className="group relative p-8 border-2 border-slate-100 rounded-3xl text-left hover:border-blue-500 hover:bg-blue-50/50 transition-all shadow-sm hover:shadow-xl"
                   >
                     <div className="text-2xl font-black group-hover:text-blue-700">{tipo.descripcion}</div>
@@ -322,7 +346,21 @@ const ReporteWizard = () => {
                   <Button variant="secondary" onClick={handleBack}>&larr; Volver</Button>
                 </div>
               ) : (
-                <MascotaForm onSubmit={handleMascotaCreated} onCancel={() => setShowNewMascotaForm(false)} />
+                <MascotaForm
+                  initialData={tempPetData}
+                  onSubmit={handleMascotaCreated}
+                  onCancel={(currentData) => {
+                    if (currentData) {
+                      setTempPetData(currentData);
+                    }
+                    if (Number(reportData.idTipoReporte) === 2) {
+                      setStep(1);
+                    } else {
+                      setShowNewMascotaForm(false);
+                    }
+                  }}
+                  showNombreDesconocidoOption={Number(reportData.idTipoReporte) === 2}
+                />
               )}
             </div>
           )}
@@ -390,6 +428,8 @@ const ReporteWizard = () => {
                 </div>
               </div>
 
+
+
               <div className="bg-blue-600 p-4 rounded-2xl max-w-sm mx-auto shadow-lg shadow-blue-100">
                 <p className="text-xs font-bold text-white uppercase tracking-tighter">
                    {new Date(`${datePart}T${hourPart.toString().padStart(2, '0')}:${minPart.toString().padStart(2, '0')}`).toLocaleString('es-CL', { dateStyle: 'long', timeStyle: 'short' })}
@@ -406,48 +446,18 @@ const ReporteWizard = () => {
           {step === 4 && (
             <div className="space-y-6 animate-fade-in">
               <div className="text-center">
-                <h2 className="text-3xl font-black text-slate-900">¿Dónde ocurrió?</h2>
-                <p className="text-slate-400 text-sm mt-2 font-medium">Marca el punto exacto del incidente en el mapa.</p>
+                <h2 className="text-3xl font-black text-slate-900">
+                  {Number(reportData.idTipoReporte) === 2 ? '¿Dónde lo encontraste?' : '¿Dónde ocurrió?'}
+                </h2>
+                <p className="text-slate-400 text-sm mt-2 font-medium">
+                  {Number(reportData.idTipoReporte) === 2 
+                    ? 'Marca el punto exacto del avistamiento o hallazgo en el mapa.' 
+                    : 'Marca el punto exacto del incidente en el mapa.'}
+                </p>
               </div>
               <MapPicker onLocationSelect={handleLocationSelect} />
               
-              {reportData.latitud && (
-                <div className="bg-white p-6 rounded-3xl border-2 border-slate-100 shadow-xl space-y-4 text-left">
-                  <h3 className="text-lg font-bold text-slate-800">Confirma la división administrativa</h3>
-                  <p className="text-xs text-slate-400">Verifica que la Región y Comuna correspondan a la ubicación en el mapa.</p>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-blue-600 uppercase tracking-wider ml-1">Región</label>
-                      <select
-                        value={selectedRegion}
-                        onChange={(e) => handleRegionChange(e.target.value)}
-                        className="w-full p-3 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-xl outline-none transition font-bold text-slate-800"
-                      >
-                        <option value="">-- Selecciona Región --</option>
-                        {regiones.map(r => (
-                          <option key={r.id} value={r.id}>{r.nombre}</option>
-                        ))}
-                      </select>
-                    </div>
 
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-blue-600 uppercase tracking-wider ml-1">Comuna</label>
-                      <select
-                        value={selectedCommune}
-                        onChange={(e) => handleCommuneChange(e.target.value)}
-                        disabled={!selectedRegion}
-                        className="w-full p-3 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-xl outline-none transition font-bold text-slate-800 disabled:opacity-50"
-                      >
-                        <option value="">-- Selecciona Comuna --</option>
-                        {comunas.map(c => (
-                          <option key={c.id} value={c.id}>{c.nombre}</option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-                </div>
-              )}
 
               {geoData && (
                 <div className="bg-green-50 p-5 rounded-2xl border-2 border-green-100 flex items-center space-x-4">
