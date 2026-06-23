@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth0 } from '@auth0/auth0-react';
 import { getReportes } from '../services/reporteService';
 import { getUbicacionById } from '../services/geoService';
 
 const Home = () => {
   const navigate = useNavigate();
+  const { isAuthenticated, isLoading } = useAuth0();
   const [recentReports, setRecentReports] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (isLoading) return;
+
     const user = localStorage.getItem('currentUser');
-    if (!user) {
+    if (!isAuthenticated && !user) {
       navigate('/login');
       return;
     }
@@ -47,7 +51,7 @@ const Home = () => {
     };
 
     fetchRecent();
-  }, [navigate]);
+  }, [navigate, isAuthenticated, isLoading]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-12">
