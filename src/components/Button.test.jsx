@@ -5,19 +5,19 @@ import '@testing-library/jest-dom';
 import Button from './Button';
 
 describe('Button Component', () => {
-  it('should render label text correctly', () => {
+  it('debe renderizar el texto de etiqueta correctamente', () => {
     render(<Button>Guardar</Button>);
     expect(screen.getByText('Guardar')).toBeInTheDocument();
   });
 
-  it('should trigger onClick callback on click event', () => {
+  it('debe gatillar el callback onClick al hacer clic', () => {
     const handleClick = vi.fn();
     render(<Button onClick={handleClick}>Enviar</Button>);
     fireEvent.click(screen.getByText('Enviar'));
     expect(handleClick).toHaveBeenCalledTimes(1);
   });
 
-  it('should be disabled and not trigger onClick when disabled is true', () => {
+  it('debe estar deshabilitado y no gatillar onClick cuando disabled es verdadero', () => {
     const handleClick = vi.fn();
     render(<Button onClick={handleClick} disabled={true}>Enviar</Button>);
     const button = screen.getByText('Enviar');

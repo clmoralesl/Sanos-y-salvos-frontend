@@ -5,7 +5,7 @@ import '@testing-library/jest-dom';
 import ConfirmModal from './ConfirmModal';
 
 describe('ConfirmModal Component', () => {
-  it('should not render anything when isOpen is false', () => {
+  it('no debe renderizar nada cuando isOpen es falso', () => {
     const { container } = render(
       <ConfirmModal
         isOpen={false}
@@ -18,7 +18,7 @@ describe('ConfirmModal Component', () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it('should render title, message and buttons when isOpen is true', () => {
+  it('debe renderizar el título, el mensaje y los botones cuando isOpen es verdadero', () => {
     render(
       <ConfirmModal
         isOpen={true}
@@ -34,7 +34,7 @@ describe('ConfirmModal Component', () => {
     expect(screen.getByText('Confirmar')).toBeInTheDocument();
   });
 
-  it('should call onConfirm and onClose when confirm button is clicked', () => {
+  it('debe llamar a onConfirm y onClose al hacer clic en el botón de confirmación', () => {
     const handleConfirm = vi.fn();
     const handleClose = vi.fn();
     render(
@@ -53,7 +53,7 @@ describe('ConfirmModal Component', () => {
     expect(handleClose).toHaveBeenCalledTimes(1);
   });
 
-  it('should call onClose when cancel button is clicked', () => {
+  it('debe llamar a onClose al hacer clic en el botón de cancelación', () => {
     const handleConfirm = vi.fn();
     const handleClose = vi.fn();
     render(

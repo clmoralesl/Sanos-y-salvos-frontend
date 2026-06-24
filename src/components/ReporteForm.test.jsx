@@ -17,7 +17,7 @@ describe('ReporteForm Component', () => {
     vi.clearAllMocks();
   });
 
-  it('should render form fields and options loaded from services', async () => {
+  it('debe renderizar los campos del formulario y las opciones cargadas desde los servicios', async () => {
     render(<ReporteForm onSubmit={vi.fn()} onCancel={vi.fn()} />);
 
     expect(screen.getByText('Tipo de Reporte')).toBeInTheDocument();
@@ -30,7 +30,7 @@ describe('ReporteForm Component', () => {
     });
   });
 
-  it('should trigger onSubmit with mapped numbers when submitted', async () => {
+  it('debe gatillar onSubmit con números mapeados al enviar el formulario', async () => {
     const handleSubmit = vi.fn();
     const { container } = render(<ReporteForm onSubmit={handleSubmit} onCancel={vi.fn()} />);
 
@@ -56,7 +56,7 @@ describe('ReporteForm Component', () => {
     }));
   });
 
-  it('should trigger onCancel when cancel button is clicked', async () => {
+  it('debe gatillar onCancel al hacer clic en el botón de cancelación', async () => {
     const handleCancel = vi.fn();
     render(<ReporteForm onSubmit={vi.fn()} onCancel={handleCancel} />);
     

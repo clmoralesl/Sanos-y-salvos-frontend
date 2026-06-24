@@ -28,20 +28,20 @@ describe('API Interceptors', () => {
     await import('./api');
   });
 
-  it('should attach default auth0 id header when local storage is empty', () => {
+  it('debe adjuntar la cabecera de id de auth0 por defecto cuando el almacenamiento local está vacío', () => {
     const mockConfig = { headers: {} };
     const result = requestInterceptorCallback(mockConfig);
     expect(result.headers['X-Auth0-Id']).toBe('auth0|local_dummy_001');
   });
 
-  it('should attach current user id from local storage', () => {
+  it('debe adjuntar el id del usuario actual desde el almacenamiento local', () => {
     localStorage.setItem('currentUser', JSON.stringify({ id: 'user|999' }));
     const mockConfig = { headers: {} };
     const result = requestInterceptorCallback(mockConfig);
     expect(result.headers['X-Auth0-Id']).toBe('user|999');
   });
 
-  it('should not overwrite X-Auth0-Id if Authorization header is present', () => {
+  it('no debe sobrescribir X-Auth0-Id si la cabecera Authorization está presente', () => {
     const mockConfig = { headers: { Authorization: 'Bearer token123' } };
     const result = requestInterceptorCallback(mockConfig);
     expect(result.headers['X-Auth0-Id']).toBeUndefined();
