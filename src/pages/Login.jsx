@@ -54,21 +54,7 @@ const Login = () => {
           <p className="mt-2 text-sm text-slate-400">Elige tu método de ingreso al sistema</p>
         </div>
 
-        <button
-          type="button"
-          onClick={() => loginWithRedirect()}
-          className="w-full bg-violet-600 text-white py-3 rounded-xl font-bold hover:bg-violet-700 transition shadow-lg flex items-center justify-center gap-2 mb-6"
-        >
-          <span>🔒</span> Iniciar Sesión con Auth0
-        </button>
-
-        <div className="relative flex py-4 items-center">
-          <div className="flex-grow border-t border-slate-700"></div>
-          <span className="flex-shrink mx-4 text-slate-500 text-xs font-bold uppercase">O continuar en local</span>
-          <div className="flex-grow border-t border-slate-700"></div>
-        </div>
-
-        <form onSubmit={handleLogin} className="space-y-6 mt-4">
+        <form onSubmit={handleLogin} className="space-y-6">
           <div>
             <label htmlFor="user-select" className="block text-sm font-medium text-slate-300 mb-2">
               Usuario de prueba local
@@ -92,9 +78,25 @@ const Login = () => {
             disabled={!selectedUser}
             className="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
           >
-            Ingresar Local
+            Ingresar
           </button>
         </form>
+
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-slate-700"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-2 bg-slate-800 text-slate-400">O ingresa con</span>
+          </div>
+        </div>
+
+        <button
+          onClick={() => loginWithRedirect()}
+          className="w-full bg-slate-700 hover:bg-slate-600 text-white py-3 rounded-xl font-bold transition shadow-lg border border-slate-600 flex items-center justify-center gap-2"
+        >
+          🔑 Iniciar sesión con Auth0
+        </button>
       </div>
     </div>
   );
