@@ -28,6 +28,13 @@ jobs:
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v2
 
+    - name: Configurar Variables de Entorno (React/Vite)
+      run: |
+        echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" > .env
+        echo "VITE_AUTH0_DOMAIN=${{ secrets.VITE_AUTH0_DOMAIN }}" >> .env
+        echo "VITE_AUTH0_CLIENT_ID=${{ secrets.VITE_AUTH0_CLIENT_ID }}" >> .env
+        echo "VITE_AUTH0_AUDIENCE=${{ secrets.VITE_AUTH0_AUDIENCE }}" >> .env
+
     - name: Construir y subir imagen del Frontend a ECR
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
