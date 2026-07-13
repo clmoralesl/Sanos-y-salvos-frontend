@@ -43,7 +43,7 @@ const MascotaForm = ({ initialData, onSubmit, onCancel, showNombreDesconocidoOpt
     const fileList = Array.from(files);
     setIsUploading(true);
     try {
-      const { subirImagenAS3 } = await import('../services/s3Service');
+      const { subirImagenAS3 } = await import('../services/cloudinaryService');
       const uploadPromises = fileList.map(async (file) => {
         if (file.type.startsWith('image/')) {
           const publicUrl = await subirImagenAS3(file, 'mascota');

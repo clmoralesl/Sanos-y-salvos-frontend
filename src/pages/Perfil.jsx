@@ -145,7 +145,7 @@ const Perfil = () => {
     if (file) {
       try {
         setUploadingPhoto(true);
-        const { subirImagenAS3 } = await import('../services/s3Service');
+        const { subirImagenAS3 } = await import('../services/cloudinaryService');
         const publicUrl = await subirImagenAS3(file, 'perfil');
         setProfilePhoto(publicUrl);
         setToast({ message: 'Foto de perfil subida exitosamente.', type: 'success' });
