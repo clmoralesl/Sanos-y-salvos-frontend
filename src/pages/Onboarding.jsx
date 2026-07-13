@@ -18,6 +18,8 @@ const Onboarding = () => {
   const [orgNombre, setOrgNombre] = useState('');
   const [orgDireccion, setOrgDireccion] = useState('');
   const [orgTelefono, setOrgTelefono] = useState('');
+  const [orgRut, setOrgRut] = useState('');
+  const [orgRutRepresentante, setOrgRutRepresentante] = useState('');
 
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -84,15 +86,17 @@ const Onboarding = () => {
       if (perteneceOrg) {
         finalTipoCuenta = 2; 
         if (orgMode === 'create') {
-          if (!orgNombre.trim()) {
-            setErrorMsg('El nombre de la organización es obligatorio.');
+          if (!orgNombre.trim() || !orgRut.trim() || !orgRutRepresentante.trim()) {
+            setErrorMsg('El nombre, el RUT de la organización y tu RUT como representante son obligatorios.');
             setLoadingSubmit(false);
             return;
           }
           const newOrg = await createOrganizacion({
             nombreOrganizacion: orgNombre,
             direccion: orgDireccion,
-            telefono: orgTelefono
+            telefono: orgTelefono,
+            rut: orgRut,
+            rutRepresentante: orgRutRepresentante
           });
           finalOrgId = newOrg.idOrganizacion;
         } else {
@@ -261,6 +265,30 @@ const Onboarding = () => {
                       onChange={(e) => setOrgDireccion(e.target.value)}
                       className="w-full bg-white text-slate-800 rounded-xl border border-slate-300 px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
                       placeholder="Ej: Av. Providencia 123"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-600 mb-1">
+                      RUT de la Organización
+                    </label>
+                    <input
+                      type="text"
+                      value={orgRut}
+                      onChange={(e) => setOrgRut(e.target.value)}
+                      className="w-full bg-white text-slate-800 rounded-xl border border-slate-300 px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+                      placeholder="Ej: 70.123.456-7"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-600 mb-1">
+                      Tu RUT (como representante legal)
+                    </label>
+                    <input
+                      type="text"
+                      value={orgRutRepresentante}
+                      onChange={(e) => setOrgRutRepresentante(e.target.value)}
+                      className="w-full bg-white text-slate-800 rounded-xl border border-slate-300 px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+                      placeholder="Ej: 12.345.678-9"
                     />
                   </div>
                   <div>
