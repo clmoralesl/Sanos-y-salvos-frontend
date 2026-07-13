@@ -106,7 +106,7 @@ const NotificationBell = ({ dbProfile }) => {
                           {notificacion.mensaje}
                         </p>
                         <p className="text-[10px] text-gray-400 mt-1 uppercase font-semibold">
-                          {new Date(notificacion.fechaCreacion).toLocaleString()}
+                          {new Date(notificacion.fechaCreacion + 'Z').toLocaleString('es-CL', { timeZone: 'America/Santiago' })}
                         </p>
                       </div>
                     </div>

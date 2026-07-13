@@ -7,6 +7,7 @@ import { getMisMascotas, deleteMascota } from '../services/mascotaService';
 import Button from '../components/Button';
 import ConfirmModal from '../components/ConfirmModal';
 import Toast from '../components/Toast';
+import { filterPhoneDigits, buildPhone, stripPhonePrefix } from '../utils/formatters';
 
 const Perfil = () => {
   const navigate = useNavigate();
@@ -59,7 +60,7 @@ const Perfil = () => {
       setAuth0Id(data.auth0Id);
       setNombre(data.nombre);
       setEmail(data.email);
-      setTelefono(data.telefono || '');
+      setTelefono(stripPhonePrefix(data.telefono));
       setIdTipoCuenta(data.idTipoCuenta || 1);
       
       setEstadoMembresia(data.estadoMembresia || '');
@@ -137,6 +138,10 @@ const Perfil = () => {
       setMessage({ type: 'error', text: 'El nombre es obligatorio.' });
       return;
     }
+    if (telefono.length !== 9) {
+      setMessage({ type: 'error', text: 'El teléfono debe tener exactamente 9 dígitos luego del +56.' });
+      return;
+    }
 
     setSaving(true);
     setMessage(null);
@@ -180,7 +185,7 @@ const Perfil = () => {
         auth0Id,
         nombre,
         email,
-        telefono,
+        telefono: buildPhone(telefono),
         idOrganizacion: finalOrgId,
         idTipoCuenta: finalTipoCuenta
       });
@@ -292,14 +297,22 @@ const Perfil = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Teléfono</label>
-                <input
-                  type="text"
-                  value={telefono}
-                  onChange={(e) => setTelefono(e.target.value)}
-                  className="w-full bg-white text-slate-800 border border-slate-350 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-sm font-semibold"
-                  placeholder="Ej: +56912345678"
-                />
+                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Teléfono <span className="text-red-500">*</span></label>
+                <div className="flex rounded-xl border border-slate-350 overflow-hidden focus-within:ring-2 focus-within:ring-blue-500">
+                  <span className="bg-slate-100 text-slate-600 px-4 py-2.5 text-sm font-bold border-r border-slate-300 flex items-center select-none">
+                    +56
+                  </span>
+                  <input
+                    type="tel"
+                    value={telefono}
+                    onChange={(e) => setTelefono(filterPhoneDigits(e.target.value))}
+                    maxLength={9}
+                    className="flex-1 bg-white text-slate-800 px-4 py-2.5 focus:outline-none text-sm font-semibold"
+                    placeholder="912345678"
+                    required
+                  />
+                </div>
+                <p className="text-xs text-slate-400 mt-1">9 dígitos (ej: 912345678)</p>
               </div>
             </div>
           </div>

@@ -3,21 +3,22 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
 import { getOrganizaciones, createOrganizacion } from '../services/organizacionService';
 import { registrarUsuario } from '../services/usuarioService';
+import { formatRut, filterPhoneDigits, buildPhone } from '../utils/formatters';
 
 const Onboarding = () => {
   const navigate = useNavigate();
   const { user: auth0User, isAuthenticated, isLoading } = useAuth0();
 
   const [nombre, setNombre] = useState('');
-  const [telefono, setTelefono] = useState('');
+  const [telefonoDigits, setTelefonoDigits] = useState('');
   const [perteneceOrg, setPerteneceOrg] = useState(false);
-  const [orgMode, setOrgMode] = useState('select'); 
+  const [orgMode, setOrgMode] = useState('select');
   const [idOrganizacion, setIdOrganizacion] = useState('');
   const [organizaciones, setOrganizaciones] = useState([]);
 
   const [orgNombre, setOrgNombre] = useState('');
   const [orgDireccion, setOrgDireccion] = useState('');
-  const [orgTelefono, setOrgTelefono] = useState('');
+  const [orgTelefonoDigits, setOrgTelefonoDigits] = useState('');
   const [orgEmail, setOrgEmail] = useState('');
   const [orgRut, setOrgRut] = useState('');
   const [orgRutRepresentante, setOrgRutRepresentante] = useState('');
@@ -76,33 +77,37 @@ const Onboarding = () => {
       setErrorMsg('El nombre es obligatorio.');
       return;
     }
+    if (telefonoDigits.length !== 9) {
+      setErrorMsg('El teléfono debe tener exactamente 9 dígitos luego del +56.');
+      return;
+    }
 
     setLoadingSubmit(true);
     setErrorMsg('');
 
     try {
       let finalOrgId = null;
-      let finalTipoCuenta = 1; 
+      let finalTipoCuenta = 1;
 
       if (perteneceOrg) {
         if (orgMode === 'create') {
-          finalTipoCuenta = 2; 
-          if (!orgNombre.trim() || !orgRut.trim() || !orgRutRepresentante.trim() || !orgEmail.trim() || !orgTelefono.trim()) {
-            setErrorMsg('Todos los campos de la organización, incluyendo correo y teléfono de contacto, son obligatorios.');
+          finalTipoCuenta = 2;
+          if (!orgNombre.trim() || !orgRut.trim() || !orgRutRepresentante.trim() || !orgEmail.trim() || orgTelefonoDigits.length !== 9) {
+            setErrorMsg('Todos los campos de la organización son obligatorios y el teléfono debe tener 9 dígitos.');
             setLoadingSubmit(false);
             return;
           }
           const newOrg = await createOrganizacion({
             nombreOrganizacion: orgNombre,
             direccion: orgDireccion,
-            telefono: orgTelefono,
+            telefono: buildPhone(orgTelefonoDigits),
             email: orgEmail,
             rut: orgRut,
             rutRepresentante: orgRutRepresentante
           });
           finalOrgId = newOrg.idOrganizacion;
         } else {
-          finalTipoCuenta = 1; 
+          finalTipoCuenta = 1;
           if (!idOrganizacion) {
             setErrorMsg('Por favor selecciona una organización de la lista.');
             setLoadingSubmit(false);
@@ -116,7 +121,7 @@ const Onboarding = () => {
         auth0Id: auth0User.sub,
         nombre: nombre,
         email: auth0User.email,
-        telefono: telefono,
+        telefono: buildPhone(telefonoDigits),
         idOrganizacion: finalOrgId,
         idTipoCuenta: finalTipoCuenta
       });
@@ -169,20 +174,29 @@ const Onboarding = () => {
               onChange={(e) => setNombre(e.target.value)}
               className="w-full bg-white text-slate-800 rounded-xl border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-sm"
               placeholder="Ingresa tu nombre"
+              required
             />
           </div>
 
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-2">
-              Teléfono de Contacto
+              Teléfono de Contacto <span className="text-red-500">*</span>
             </label>
-            <input
-              type="text"
-              value={telefono}
-              onChange={(e) => setTelefono(e.target.value)}
-              className="w-full bg-white text-slate-800 rounded-xl border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-sm"
-              placeholder="Ej: +56912345678"
-            />
+            <div className="flex rounded-xl border border-slate-300 overflow-hidden focus-within:ring-2 focus-within:ring-blue-500">
+              <span className="bg-slate-100 text-slate-600 px-4 py-3 text-sm font-bold border-r border-slate-300 flex items-center select-none">
+                +56
+              </span>
+              <input
+                type="tel"
+                value={telefonoDigits}
+                onChange={(e) => setTelefonoDigits(filterPhoneDigits(e.target.value))}
+                maxLength={9}
+                className="flex-1 bg-white text-slate-800 px-4 py-3 focus:outline-none text-sm"
+                placeholder="912345678"
+                required
+              />
+            </div>
+            <p className="text-xs text-slate-400 mt-1">9 dígitos (ej: 912345678)</p>
           </div>
 
           <div className="border-t border-slate-150 pt-4">
@@ -274,16 +288,22 @@ const Onboarding = () => {
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-slate-600 mb-1">
-                      Teléfono de la Organización
+                      Teléfono de la Organización <span className="text-red-500">*</span>
                     </label>
-                    <input
-                      type="text"
-                      value={orgTelefono}
-                      onChange={(e) => setOrgTelefono(e.target.value)}
-                      className="w-full bg-white text-slate-800 rounded-xl border border-slate-300 px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
-                      placeholder="Ej: +56912345678"
-                      required
-                    />
+                    <div className="flex rounded-xl border border-slate-300 overflow-hidden focus-within:ring-2 focus-within:ring-blue-500">
+                      <span className="bg-slate-100 text-slate-600 px-3 py-2 text-xs font-bold border-r border-slate-300 flex items-center select-none">
+                        +56
+                      </span>
+                      <input
+                        type="tel"
+                        value={orgTelefonoDigits}
+                        onChange={(e) => setOrgTelefonoDigits(filterPhoneDigits(e.target.value))}
+                        maxLength={9}
+                        className="flex-1 bg-white text-slate-800 px-3 py-2 focus:outline-none text-xs"
+                        placeholder="912345678"
+                        required
+                      />
+                    </div>
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-slate-600 mb-1">
@@ -305,7 +325,7 @@ const Onboarding = () => {
                     <input
                       type="text"
                       value={orgRut}
-                      onChange={(e) => setOrgRut(e.target.value)}
+                      onChange={(e) => setOrgRut(formatRut(e.target.value))}
                       className="w-full bg-white text-slate-800 rounded-xl border border-slate-300 px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
                       placeholder="Ej: 70.123.456-7"
                       required
@@ -318,7 +338,7 @@ const Onboarding = () => {
                     <input
                       type="text"
                       value={orgRutRepresentante}
-                      onChange={(e) => setOrgRutRepresentante(e.target.value)}
+                      onChange={(e) => setOrgRutRepresentante(formatRut(e.target.value))}
                       className="w-full bg-white text-slate-800 rounded-xl border border-slate-300 px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
                       placeholder="Ej: 12.345.678-9"
                       required
