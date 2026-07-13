@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
 import { getOrganizaciones, createOrganizacion } from '../services/organizacionService';
 import { registrarUsuario } from '../services/usuarioService';
-import { formatRut, filterPhoneDigits, buildPhone } from '../utils/formatters';
+import { formatRut, filterPhoneDigits, buildPhone, validateRut } from '../utils/formatters';
 
 const Onboarding = () => {
   const navigate = useNavigate();
@@ -25,6 +25,19 @@ const Onboarding = () => {
 
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+
+  // Estados de error inline
+  const [errors, setErrors] = useState({
+    nombre: '',
+    telefono: '',
+    orgNombre: '',
+    orgEmail: '',
+    orgTelefono: '',
+    orgDireccion: '',
+    orgRut: '',
+    orgRutRepresentante: '',
+    idOrganizacion: ''
+  });
 
   useEffect(() => {
     if (auth0User) {
@@ -73,12 +86,67 @@ const Onboarding = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Reset errors
+    const newErrors = {
+      nombre: '',
+      telefono: '',
+      orgNombre: '',
+      orgEmail: '',
+      orgTelefono: '',
+      orgDireccion: '',
+      orgRut: '',
+      orgRutRepresentante: '',
+      idOrganizacion: ''
+    };
+    let hasError = false;
+
     if (!nombre.trim()) {
-      setErrorMsg('El nombre es obligatorio.');
-      return;
+      newErrors.nombre = 'El nombre es obligatorio.';
+      hasError = true;
     }
     if (telefonoDigits.length !== 9) {
-      setErrorMsg('El teléfono debe tener exactamente 9 dígitos luego del +56.');
+      newErrors.telefono = 'El teléfono debe tener exactamente 9 dígitos luego del +56.';
+      hasError = true;
+    }
+
+    if (perteneceOrg) {
+      if (orgMode === 'create') {
+        if (!orgNombre.trim()) {
+          newErrors.orgNombre = 'El nombre de la organización es obligatorio.';
+          hasError = true;
+        }
+        if (!orgEmail.trim()) {
+          newErrors.orgEmail = 'El correo electrónico es obligatorio.';
+          hasError = true;
+        }
+        if (orgTelefonoDigits.length !== 9) {
+          newErrors.orgTelefono = 'El teléfono de la organización debe tener exactamente 9 dígitos luego del +56.';
+          hasError = true;
+        }
+        if (!orgDireccion.trim()) {
+          newErrors.orgDireccion = 'La dirección es obligatoria.';
+          hasError = true;
+        }
+        if (!orgRut.trim() || !validateRut(orgRut)) {
+          newErrors.orgRut = 'El RUT de la organización es inválido o incompleto.';
+          hasError = true;
+        }
+        if (!orgRutRepresentante.trim() || !validateRut(orgRutRepresentante)) {
+          newErrors.orgRutRepresentante = 'El RUT del representante es inválido o incompleto.';
+          hasError = true;
+        }
+      } else {
+        if (!idOrganizacion) {
+          newErrors.idOrganizacion = 'Por favor selecciona una organización de la lista.';
+          hasError = true;
+        }
+      }
+    }
+
+    if (hasError) {
+      setErrors(newErrors);
+      setErrorMsg('Por favor corrige los errores resaltados en el formulario.');
       return;
     }
 
@@ -92,11 +160,6 @@ const Onboarding = () => {
       if (perteneceOrg) {
         if (orgMode === 'create') {
           finalTipoCuenta = 2;
-          if (!orgNombre.trim() || !orgRut.trim() || !orgRutRepresentante.trim() || !orgEmail.trim() || orgTelefonoDigits.length !== 9) {
-            setErrorMsg('Todos los campos de la organización son obligatorios y el teléfono debe tener 9 dígitos.');
-            setLoadingSubmit(false);
-            return;
-          }
           const newOrg = await createOrganizacion({
             nombreOrganizacion: orgNombre,
             direccion: orgDireccion,
@@ -108,11 +171,6 @@ const Onboarding = () => {
           finalOrgId = newOrg.idOrganizacion;
         } else {
           finalTipoCuenta = 1;
-          if (!idOrganizacion) {
-            setErrorMsg('Por favor selecciona una organización de la lista.');
-            setLoadingSubmit(false);
-            return;
-          }
           finalOrgId = parseInt(idOrganizacion);
         }
       }
@@ -171,32 +229,45 @@ const Onboarding = () => {
             <input
               type="text"
               value={nombre}
-              onChange={(e) => setNombre(e.target.value)}
-              className="w-full bg-white text-slate-800 rounded-xl border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-sm"
+              onChange={(e) => {
+                setNombre(e.target.value);
+                setErrors(prev => ({ ...prev, nombre: '' }));
+              }}
+              className={`w-full bg-white text-slate-800 rounded-xl border px-4 py-3 focus:outline-none focus:ring-2 transition text-sm ${
+                errors.nombre ? 'border-red-500 focus:ring-red-500' : 'border-slate-300 focus:ring-blue-500'
+              }`}
               placeholder="Ingresa tu nombre"
-              required
             />
+            {errors.nombre && <p className="text-xs text-red-500 mt-1">{errors.nombre}</p>}
           </div>
 
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-2">
               Teléfono de Contacto <span className="text-red-500">*</span>
             </label>
-            <div className="flex rounded-xl border border-slate-300 overflow-hidden focus-within:ring-2 focus-within:ring-blue-500">
+            <div className={`flex rounded-xl border overflow-hidden focus-within:ring-2 ${
+              errors.telefono ? 'border-red-500 focus-within:ring-red-500' : 'border-slate-300 focus-within:ring-blue-500'
+            }`}>
               <span className="bg-slate-100 text-slate-600 px-4 py-3 text-sm font-bold border-r border-slate-300 flex items-center select-none">
                 +56
               </span>
               <input
                 type="tel"
                 value={telefonoDigits}
-                onChange={(e) => setTelefonoDigits(filterPhoneDigits(e.target.value))}
+                onChange={(e) => {
+                  setTelefonoDigits(filterPhoneDigits(e.target.value));
+                  setErrors(prev => ({ ...prev, telefono: '' }));
+                }}
                 maxLength={9}
                 className="flex-1 bg-white text-slate-800 px-4 py-3 focus:outline-none text-sm"
                 placeholder="912345678"
-                required
               />
             </div>
-            <p className="text-xs text-slate-400 mt-1">9 dígitos (ej: 912345678)</p>
+            {errors.telefono ? (
+              <p className="text-xs text-red-500 mt-1">{errors.telefono}</p>
+            ) : (
+              <p className="text-xs text-slate-400 mt-1">9 dígitos (ej: 912345678)</p>
+            )}
           </div>
 
           <div className="border-t border-slate-150 pt-4">
@@ -247,16 +318,22 @@ const Onboarding = () => {
                   </label>
                   <select
                     value={idOrganizacion}
-                    onChange={(e) => setIdOrganizacion(e.target.value)}
-                    className="w-full bg-white text-slate-800 rounded-xl border border-slate-350 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-sm"
+                    onChange={(e) => {
+                      setIdOrganizacion(e.target.value);
+                      setErrors(prev => ({ ...prev, idOrganizacion: '' }));
+                    }}
+                    className={`w-full bg-white text-slate-800 rounded-xl border px-4 py-3 focus:outline-none focus:ring-2 transition text-sm ${
+                      errors.idOrganizacion ? 'border-red-500 focus:ring-red-500' : 'border-slate-350 focus:ring-blue-500'
+                    }`}
                   >
                     <option value="">-- Elige una organización --</option>
-                    {organizaciones.map((org) => (
+                    {organizaciones.filter(org => org.estado === 'ACTIVA').map((org) => (
                       <option key={org.idOrganizacion} value={org.idOrganizacion}>
                         {org.nombreOrganizacion}
                       </option>
                     ))}
                   </select>
+                  {errors.idOrganizacion && <p className="text-xs text-red-500 mt-1">{errors.idOrganizacion}</p>}
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -267,11 +344,16 @@ const Onboarding = () => {
                     <input
                       type="text"
                       value={orgNombre}
-                      onChange={(e) => setOrgNombre(e.target.value)}
-                      className="w-full bg-white text-slate-800 rounded-xl border border-slate-300 px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+                      onChange={(e) => {
+                        setOrgNombre(e.target.value);
+                        setErrors(prev => ({ ...prev, orgNombre: '' }));
+                      }}
+                      className={`w-full bg-white text-slate-800 rounded-xl border px-3 py-2 text-xs focus:outline-none focus:ring-2 ${
+                        errors.orgNombre ? 'border-red-500 focus:ring-red-500' : 'border-slate-300 focus:ring-blue-500'
+                      }`}
                       placeholder="Ej: Patitas Felices"
-                      required
                     />
+                    {errors.orgNombre && <p className="text-xs text-red-500 mt-1">{errors.orgNombre}</p>}
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-slate-600 mb-1">
@@ -280,30 +362,40 @@ const Onboarding = () => {
                     <input
                       type="email"
                       value={orgEmail}
-                      onChange={(e) => setOrgEmail(e.target.value)}
-                      className="w-full bg-white text-slate-800 rounded-xl border border-slate-300 px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+                      onChange={(e) => {
+                        setOrgEmail(e.target.value);
+                        setErrors(prev => ({ ...prev, orgEmail: '' }));
+                      }}
+                      className={`w-full bg-white text-slate-800 rounded-xl border px-3 py-2 text-xs focus:outline-none focus:ring-2 ${
+                        errors.orgEmail ? 'border-red-500 focus:ring-red-500' : 'border-slate-300 focus:ring-blue-500'
+                      }`}
                       placeholder="Ej: contacto@patitas.cl"
-                      required
                     />
+                    {errors.orgEmail && <p className="text-xs text-red-500 mt-1">{errors.orgEmail}</p>}
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-slate-600 mb-1">
                       Teléfono de la Organización <span className="text-red-500">*</span>
                     </label>
-                    <div className="flex rounded-xl border border-slate-300 overflow-hidden focus-within:ring-2 focus-within:ring-blue-500">
+                    <div className={`flex rounded-xl border overflow-hidden focus-within:ring-2 ${
+                      errors.orgTelefono ? 'border-red-500 focus-within:ring-red-500' : 'border-slate-300 focus-within:ring-blue-500'
+                    }`}>
                       <span className="bg-slate-100 text-slate-600 px-3 py-2 text-xs font-bold border-r border-slate-300 flex items-center select-none">
                         +56
                       </span>
                       <input
                         type="tel"
                         value={orgTelefonoDigits}
-                        onChange={(e) => setOrgTelefonoDigits(filterPhoneDigits(e.target.value))}
+                        onChange={(e) => {
+                          setOrgTelefonoDigits(filterPhoneDigits(e.target.value));
+                          setErrors(prev => ({ ...prev, orgTelefono: '' }));
+                        }}
                         maxLength={9}
                         className="flex-1 bg-white text-slate-800 px-3 py-2 focus:outline-none text-xs"
                         placeholder="912345678"
-                        required
                       />
                     </div>
+                    {errors.orgTelefono && <p className="text-xs text-red-500 mt-1">{errors.orgTelefono}</p>}
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-slate-600 mb-1">
@@ -312,11 +404,16 @@ const Onboarding = () => {
                     <input
                       type="text"
                       value={orgDireccion}
-                      onChange={(e) => setOrgDireccion(e.target.value)}
-                      className="w-full bg-white text-slate-800 rounded-xl border border-slate-300 px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+                      onChange={(e) => {
+                        setOrgDireccion(e.target.value);
+                        setErrors(prev => ({ ...prev, orgDireccion: '' }));
+                      }}
+                      className={`w-full bg-white text-slate-800 rounded-xl border px-3 py-2 text-xs focus:outline-none focus:ring-2 ${
+                        errors.orgDireccion ? 'border-red-500 focus:ring-red-500' : 'border-slate-300 focus:ring-blue-500'
+                      }`}
                       placeholder="Ej: Av. Providencia 123"
-                      required
                     />
+                    {errors.orgDireccion && <p className="text-xs text-red-500 mt-1">{errors.orgDireccion}</p>}
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-slate-600 mb-1">
@@ -325,11 +422,16 @@ const Onboarding = () => {
                     <input
                       type="text"
                       value={orgRut}
-                      onChange={(e) => setOrgRut(formatRut(e.target.value))}
-                      className="w-full bg-white text-slate-800 rounded-xl border border-slate-300 px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+                      onChange={(e) => {
+                        setOrgRut(formatRut(e.target.value));
+                        setErrors(prev => ({ ...prev, orgRut: '' }));
+                      }}
+                      className={`w-full bg-white text-slate-800 rounded-xl border px-3 py-2 text-xs focus:outline-none focus:ring-2 ${
+                        errors.orgRut ? 'border-red-500 focus:ring-red-500' : 'border-slate-300 focus:ring-blue-500'
+                      }`}
                       placeholder="Ej: 70.123.456-7"
-                      required
                     />
+                    {errors.orgRut && <p className="text-xs text-red-500 mt-1">{errors.orgRut}</p>}
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-slate-600 mb-1">
@@ -338,11 +440,16 @@ const Onboarding = () => {
                     <input
                       type="text"
                       value={orgRutRepresentante}
-                      onChange={(e) => setOrgRutRepresentante(formatRut(e.target.value))}
-                      className="w-full bg-white text-slate-800 rounded-xl border border-slate-300 px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+                      onChange={(e) => {
+                        setOrgRutRepresentante(formatRut(e.target.value));
+                        setErrors(prev => ({ ...prev, orgRutRepresentante: '' }));
+                      }}
+                      className={`w-full bg-white text-slate-800 rounded-xl border px-3 py-2 text-xs focus:outline-none focus:ring-2 ${
+                        errors.orgRutRepresentante ? 'border-red-500 focus:ring-red-500' : 'border-slate-300 focus:ring-blue-500'
+                      }`}
                       placeholder="Ej: 12.345.678-9"
-                      required
                     />
+                    {errors.orgRutRepresentante && <p className="text-xs text-red-500 mt-1">{errors.orgRutRepresentante}</p>}
                   </div>
                 </div>
               )}

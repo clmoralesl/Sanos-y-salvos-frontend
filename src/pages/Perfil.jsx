@@ -7,7 +7,7 @@ import { getMisMascotas, deleteMascota } from '../services/mascotaService';
 import Button from '../components/Button';
 import ConfirmModal from '../components/ConfirmModal';
 import Toast from '../components/Toast';
-import { filterPhoneDigits, buildPhone, stripPhonePrefix } from '../utils/formatters';
+import { filterPhoneDigits, buildPhone, stripPhonePrefix, formatRut, validateRut } from '../utils/formatters';
 
 const Perfil = () => {
   const navigate = useNavigate();
@@ -33,8 +33,10 @@ const Perfil = () => {
 
   const [orgNombre, setOrgNombre] = useState('');
   const [orgDireccion, setOrgDireccion] = useState('');
-  const [orgTelefono, setOrgTelefono] = useState('');
+  const [orgTelefonoDigits, setOrgTelefonoDigits] = useState('');
   const [orgEmail, setOrgEmail] = useState('');
+  const [orgRut, setOrgRut] = useState('');
+  const [orgRutRepresentante, setOrgRutRepresentante] = useState('');
 
   const [profilePhoto, setProfilePhoto] = useState('');
   const [loading, setLoading] = useState(true);
@@ -44,6 +46,19 @@ const Perfil = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [petToDelete, setPetToDelete] = useState(null);
   const [toast, setToast] = useState(null);
+
+  // Estados de error inline
+  const [errors, setErrors] = useState({
+    nombre: '',
+    telefono: '',
+    orgNombre: '',
+    orgEmail: '',
+    orgTelefono: '',
+    orgDireccion: '',
+    orgRut: '',
+    orgRutRepresentante: '',
+    idOrganizacion: ''
+  });
 
   useEffect(() => {
     const userJson = localStorage.getItem('currentUser');
@@ -134,12 +149,67 @@ const Perfil = () => {
 
   const handleSave = async (e) => {
     e.preventDefault();
+    
+    // Reset errors
+    const newErrors = {
+      nombre: '',
+      telefono: '',
+      orgNombre: '',
+      orgEmail: '',
+      orgTelefono: '',
+      orgDireccion: '',
+      orgRut: '',
+      orgRutRepresentante: '',
+      idOrganizacion: ''
+    };
+    let hasError = false;
+
     if (!nombre.trim()) {
-      setMessage({ type: 'error', text: 'El nombre es obligatorio.' });
-      return;
+      newErrors.nombre = 'El nombre es obligatorio.';
+      hasError = true;
     }
     if (telefono.length !== 9) {
-      setMessage({ type: 'error', text: 'El teléfono debe tener exactamente 9 dígitos luego del +56.' });
+      newErrors.telefono = 'El teléfono debe tener exactamente 9 dígitos luego del +56.';
+      hasError = true;
+    }
+
+    if (perteneceOrg && !idOrganizacion) {
+      if (orgMode === 'create') {
+        if (!orgNombre.trim()) {
+          newErrors.orgNombre = 'El nombre de la organización es obligatorio.';
+          hasError = true;
+        }
+        if (!orgEmail.trim()) {
+          newErrors.orgEmail = 'El correo electrónico es obligatorio.';
+          hasError = true;
+        }
+        if (orgTelefonoDigits.length !== 9) {
+          newErrors.orgTelefono = 'El teléfono debe tener exactamente 9 dígitos luego del +56.';
+          hasError = true;
+        }
+        if (!orgDireccion.trim()) {
+          newErrors.orgDireccion = 'La dirección es obligatoria.';
+          hasError = true;
+        }
+        if (!orgRut.trim() || !validateRut(orgRut)) {
+          newErrors.orgRut = 'El RUT de la organización es inválido.';
+          hasError = true;
+        }
+        if (!orgRutRepresentante.trim() || !validateRut(orgRutRepresentante)) {
+          newErrors.orgRutRepresentante = 'El RUT del representante es inválido.';
+          hasError = true;
+        }
+      } else {
+        if (!idOrganizacion) {
+          newErrors.idOrganizacion = 'Por favor selecciona una organización.';
+          hasError = true;
+        }
+      }
+    }
+
+    if (hasError) {
+      setErrors(newErrors);
+      setMessage({ type: 'error', text: 'Por favor corrige los errores en el formulario.' });
       return;
     }
 
@@ -148,34 +218,24 @@ const Perfil = () => {
 
     try {
       let finalOrgId = null;
-      let finalTipoCuenta = idTipoCuenta; // Preservar el rol actual por defecto
+      let finalTipoCuenta = idTipoCuenta;
 
       if (perteneceOrg) {
-        if (orgMode === 'create') {
-          if (finalTipoCuenta < 2) finalTipoCuenta = 2; // Ascender a ADMIN_ORG si no es SUPER_ADMIN
-          if (!orgNombre.trim()) {
-            setMessage({ type: 'error', text: 'El nombre de la organización es obligatorio.' });
-            setSaving(false);
-            return;
-          }
+        if (orgMode === 'create' && !idOrganizacion) {
+          if (finalTipoCuenta < 2) finalTipoCuenta = 2;
           const newOrg = await createOrganizacion({
             nombreOrganizacion: orgNombre,
             direccion: orgDireccion,
-            telefono: orgTelefono,
-            email: orgEmail
+            telefono: buildPhone(orgTelefonoDigits),
+            email: orgEmail,
+            rut: orgRut,
+            rutRepresentante: orgRutRepresentante
           });
           finalOrgId = newOrg.idOrganizacion;
         } else {
-          if (!idOrganizacion) {
-            setMessage({ type: 'error', text: 'Por favor selecciona una organización.' });
-            setSaving(false);
-            return;
-          }
           finalOrgId = parseInt(idOrganizacion);
-          // Nota: Si ya era ADMIN_ORG o SUPER_ADMIN, conserva su rol.
         }
       } else {
-        // Si no pertenece a organización, y era ADMIN_ORG, vuelve a USUARIO_ESTANDAR
         if (finalTipoCuenta === 2) {
           finalTipoCuenta = 1;
         }
@@ -290,29 +350,43 @@ const Perfil = () => {
                 <input
                   type="text"
                   value={nombre}
-                  onChange={(e) => setNombre(e.target.value)}
-                  className="w-full bg-white text-slate-800 border border-slate-350 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-sm font-semibold"
+                  onChange={(e) => {
+                    setNombre(e.target.value);
+                    setErrors(prev => ({ ...prev, nombre: '' }));
+                  }}
+                  className={`w-full bg-white text-slate-800 border rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 transition text-sm font-semibold ${
+                    errors.nombre ? 'border-red-500 focus:ring-red-500' : 'border-slate-350 focus:ring-blue-500'
+                  }`}
                   required
                 />
+                {errors.nombre && <p className="text-xs text-red-500 mt-1">{errors.nombre}</p>}
               </div>
 
               <div>
                 <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Teléfono <span className="text-red-500">*</span></label>
-                <div className="flex rounded-xl border border-slate-350 overflow-hidden focus-within:ring-2 focus-within:ring-blue-500">
+                <div className={`flex rounded-xl border overflow-hidden focus-within:ring-2 ${
+                  errors.telefono ? 'border-red-500 focus-within:ring-red-500' : 'border-slate-355 focus-within:ring-blue-500'
+                }`}>
                   <span className="bg-slate-100 text-slate-600 px-4 py-2.5 text-sm font-bold border-r border-slate-300 flex items-center select-none">
                     +56
                   </span>
                   <input
                     type="tel"
                     value={telefono}
-                    onChange={(e) => setTelefono(filterPhoneDigits(e.target.value))}
+                    onChange={(e) => {
+                      setTelefono(filterPhoneDigits(e.target.value));
+                      setErrors(prev => ({ ...prev, telefono: '' }));
+                    }}
                     maxLength={9}
                     className="flex-1 bg-white text-slate-800 px-4 py-2.5 focus:outline-none text-sm font-semibold"
                     placeholder="912345678"
-                    required
                   />
                 </div>
-                <p className="text-xs text-slate-400 mt-1">9 dígitos (ej: 912345678)</p>
+                {errors.telefono ? (
+                  <p className="text-xs text-red-500 mt-1">{errors.telefono}</p>
+                ) : (
+                  <p className="text-xs text-slate-400 mt-1">9 dígitos (ej: 912345678)</p>
+                )}
               </div>
             </div>
           </div>
@@ -447,14 +521,20 @@ const Perfil = () => {
                         <label className="block text-xs font-bold text-slate-600 mb-1">Elige tu Organización</label>
                         <select
                           value={idOrganizacion}
-                          onChange={(e) => setIdOrganizacion(e.target.value)}
-                          className="w-full bg-white text-slate-800 border border-slate-350 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-sm font-semibold bg-white"
+                          onChange={(e) => {
+                            setIdOrganizacion(e.target.value);
+                            setErrors(prev => ({ ...prev, idOrganizacion: '' }));
+                          }}
+                          className={`w-full bg-white text-slate-800 border rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 transition text-sm font-semibold bg-white ${
+                            errors.idOrganizacion ? 'border-red-500 focus:ring-red-500' : 'border-slate-350 focus:ring-blue-500'
+                          }`}
                         >
                           <option value="">-- Elige una organización --</option>
-                          {organizaciones.map(o => (
+                          {organizaciones.filter(o => o.estado === 'ACTIVA').map(o => (
                             <option key={o.idOrganizacion} value={o.idOrganizacion}>{o.nombreOrganizacion}</option>
                           ))}
                         </select>
+                        {errors.idOrganizacion && <p className="text-xs text-red-500 mt-1">{errors.idOrganizacion}</p>}
                       </div>
                     ) : (
                       <div className="space-y-3">
@@ -463,44 +543,102 @@ const Perfil = () => {
                           <input
                             type="text"
                             value={orgNombre}
-                            onChange={(e) => setOrgNombre(e.target.value)}
-                            className="w-full bg-white text-slate-800 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+                            onChange={(e) => {
+                              setOrgNombre(e.target.value);
+                              setErrors(prev => ({ ...prev, orgNombre: '' }));
+                            }}
+                            className={`w-full bg-white text-slate-800 border rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 ${
+                              errors.orgNombre ? 'border-red-500 focus:ring-red-500' : 'border-slate-300 focus:ring-blue-500'
+                            }`}
                             placeholder="Ej: Patitas Felices"
-                            required
                           />
+                          {errors.orgNombre && <p className="text-xs text-red-500 mt-1">{errors.orgNombre}</p>}
                         </div>
                         <div>
                           <label className="block text-xs font-bold text-slate-600 mb-1">Correo Electrónico (Contacto)</label>
                           <input
                             type="email"
                             value={orgEmail}
-                            onChange={(e) => setOrgEmail(e.target.value)}
-                            className="w-full bg-white text-slate-800 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+                            onChange={(e) => {
+                              setOrgEmail(e.target.value);
+                              setErrors(prev => ({ ...prev, orgEmail: '' }));
+                            }}
+                            className={`w-full bg-white text-slate-800 border rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 ${
+                              errors.orgEmail ? 'border-red-500 focus:ring-red-500' : 'border-slate-300 focus:ring-blue-500'
+                            }`}
                             placeholder="Ej: contacto@patitas.cl"
-                            required
                           />
+                          {errors.orgEmail && <p className="text-xs text-red-500 mt-1">{errors.orgEmail}</p>}
                         </div>
                         <div>
-                          <label className="block text-xs font-bold text-slate-600 mb-1">Teléfono (Contacto)</label>
-                          <input
-                            type="text"
-                            value={orgTelefono}
-                            onChange={(e) => setOrgTelefono(e.target.value)}
-                            className="w-full bg-white text-slate-800 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
-                            placeholder="Ej: +5699999999"
-                            required
-                          />
+                          <label className="block text-xs font-bold text-slate-600 mb-1">Teléfono (Contacto) <span className="text-red-500">*</span></label>
+                          <div className={`flex rounded-xl border overflow-hidden focus-within:ring-2 ${
+                            errors.orgTelefono ? 'border-red-500 focus-within:ring-red-500' : 'border-slate-300 focus-within:ring-blue-500'
+                          }`}>
+                            <span className="bg-slate-100 text-slate-600 px-3 py-2 text-xs font-bold border-r border-slate-300 flex items-center select-none">
+                              +56
+                            </span>
+                            <input
+                              type="tel"
+                              value={orgTelefonoDigits}
+                              onChange={(e) => {
+                                setOrgTelefonoDigits(filterPhoneDigits(e.target.value));
+                                setErrors(prev => ({ ...prev, orgTelefono: '' }));
+                              }}
+                              maxLength={9}
+                              className="flex-1 bg-white text-slate-800 px-3 py-2 focus:outline-none text-xs"
+                              placeholder="912345678"
+                            />
+                          </div>
+                          {errors.orgTelefono && <p className="text-xs text-red-500 mt-1">{errors.orgTelefono}</p>}
                         </div>
                         <div>
                           <label className="block text-xs font-bold text-slate-600 mb-1">Dirección</label>
                           <input
                             type="text"
                             value={orgDireccion}
-                            onChange={(e) => setOrgDireccion(e.target.value)}
-                            className="w-full bg-white text-slate-800 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+                            onChange={(e) => {
+                              setOrgDireccion(e.target.value);
+                              setErrors(prev => ({ ...prev, orgDireccion: '' }));
+                            }}
+                            className={`w-full bg-white text-slate-800 border rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 ${
+                              errors.orgDireccion ? 'border-red-500 focus:ring-red-500' : 'border-slate-300 focus:ring-blue-500'
+                            }`}
                             placeholder="Ej: Calle Nueva 123"
-                            required
                           />
+                          {errors.orgDireccion && <p className="text-xs text-red-500 mt-1">{errors.orgDireccion}</p>}
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-600 mb-1">RUT de la Organización</label>
+                          <input
+                            type="text"
+                            value={orgRut}
+                            onChange={(e) => {
+                              setOrgRut(formatRut(e.target.value));
+                              setErrors(prev => ({ ...prev, orgRut: '' }));
+                            }}
+                            className={`w-full bg-white text-slate-800 border rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 ${
+                              errors.orgRut ? 'border-red-500 focus:ring-red-500' : 'border-slate-300 focus:ring-blue-500'
+                            }`}
+                            placeholder="Ej: 70.123.456-7"
+                          />
+                          {errors.orgRut && <p className="text-xs text-red-500 mt-1">{errors.orgRut}</p>}
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-600 mb-1">Tu RUT (como representante legal)</label>
+                          <input
+                            type="text"
+                            value={orgRutRepresentante}
+                            onChange={(e) => {
+                              setOrgRutRepresentante(formatRut(e.target.value));
+                              setErrors(prev => ({ ...prev, orgRutRepresentante: '' }));
+                            }}
+                            className={`w-full bg-white text-slate-800 border rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 ${
+                              errors.orgRutRepresentante ? 'border-red-500 focus:ring-red-500' : 'border-slate-300 focus:ring-blue-500'
+                            }`}
+                            placeholder="Ej: 12.345.678-9"
+                          />
+                          {errors.orgRutRepresentante && <p className="text-xs text-red-500 mt-1">{errors.orgRutRepresentante}</p>}
                         </div>
                       </div>
                     )}

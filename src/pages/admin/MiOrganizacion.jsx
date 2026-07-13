@@ -62,7 +62,7 @@ const MiOrganizacion = () => {
     const allUsers = await getUsuarios();
     const myUsers = allUsers.filter(u => u.idOrganizacion === orgId);
 
-    setSolicitudes(myUsers.filter(u => u.estadoMembresia === 'PENDIENTE'));
+    setSolicitudes(myUsers.filter(u => u.estadoMembresia === 'PENDIENTE' && u.descripcionTipoCuenta !== 'ADMIN_ORG'));
     setVoluntarios(myUsers.filter(u => u.estadoMembresia === 'APROBADO' && u.descripcionTipoCuenta !== 'ADMIN_ORG'));
   };
 
@@ -113,7 +113,7 @@ const MiOrganizacion = () => {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8 text-slate-800">
       <div className="mb-8">
         <h2 className="text-4xl font-extrabold text-slate-900 tracking-tight flex items-center gap-3">
-          🏢 Mi Refugio
+          🏢 Mi Organización
         </h2>
         <p className="text-slate-500 mt-2 text-lg">Administra la información de tu organización y gestiona tu equipo de voluntarios.</p>
       </div>

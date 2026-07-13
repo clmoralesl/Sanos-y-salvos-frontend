@@ -15,3 +15,11 @@ export const buildPhone = (digits) =>
 
 export const filterPhoneDigits = (value) =>
   value.replace(/\D/g, '').slice(0, 9);
+
+export const validateRut = (rut) => {
+  if (!rut) return false;
+  const clean = rut.replace(/[^0-9kK]/g, '');
+  if (clean.length < 8 || clean.length > 9) return false;
+  return true;
+};
+
