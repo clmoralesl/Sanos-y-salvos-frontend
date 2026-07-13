@@ -143,11 +143,11 @@ const Perfil = () => {
 
     try {
       let finalOrgId = null;
-      let finalTipoCuenta = 1;
+      let finalTipoCuenta = idTipoCuenta; // Preservar el rol actual por defecto
 
       if (perteneceOrg) {
         if (orgMode === 'create') {
-          finalTipoCuenta = 2;
+          if (finalTipoCuenta < 2) finalTipoCuenta = 2; // Ascender a ADMIN_ORG si no es SUPER_ADMIN
           if (!orgNombre.trim()) {
             setMessage({ type: 'error', text: 'El nombre de la organización es obligatorio.' });
             setSaving(false);
@@ -161,13 +161,18 @@ const Perfil = () => {
           });
           finalOrgId = newOrg.idOrganizacion;
         } else {
-          finalTipoCuenta = 1;
           if (!idOrganizacion) {
             setMessage({ type: 'error', text: 'Por favor selecciona una organización.' });
             setSaving(false);
             return;
           }
           finalOrgId = parseInt(idOrganizacion);
+          // Nota: Si ya era ADMIN_ORG o SUPER_ADMIN, conserva su rol.
+        }
+      } else {
+        // Si no pertenece a organización, y era ADMIN_ORG, vuelve a USUARIO_ESTANDAR
+        if (finalTipoCuenta === 2) {
+          finalTipoCuenta = 1;
         }
       }
 
