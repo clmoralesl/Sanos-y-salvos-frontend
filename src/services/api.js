@@ -38,4 +38,14 @@ export const setupInterceptors = (getAccessTokenSilently) => {
   );
 };
 
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (!error.response || error.response.status >= 500) {
+      window.dispatchEvent(new CustomEvent('global-api-error', { detail: error }));
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default api;

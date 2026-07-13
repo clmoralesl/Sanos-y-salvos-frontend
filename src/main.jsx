@@ -21,6 +21,7 @@ import Organizaciones from './pages/admin/Organizaciones'
 import SolicitudesOrganizaciones from './pages/admin/SolicitudesOrganizaciones'
 import MiOrganizacion from './pages/admin/MiOrganizacion'
 import AdminReporteDetalle from './pages/admin/AdminReporteDetalle'
+import GlobalErrorView from './components/GlobalErrorView'
 
 const domain = import.meta.env.VITE_AUTH0_DOMAIN
 const clientId = import.meta.env.VITE_AUTH0_CLIENT_ID
@@ -36,10 +37,11 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         audience: audience
       }}
     >
-      <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/registro" element={<Onboarding />} />
+      <GlobalErrorView>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/registro" element={<Onboarding />} />
 
           <Route path="/" element={<PublicLayout />}>
             <Route index element={<Home />} />
@@ -64,6 +66,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <Route path="*" element={<div className="h-screen flex items-center justify-center">404 - Página no encontrada</div>} />
         </Routes>
       </BrowserRouter>
+      </GlobalErrorView>
     </Auth0Provider>
   </React.StrictMode>,
 )

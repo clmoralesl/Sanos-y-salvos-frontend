@@ -97,7 +97,12 @@ const Perfil = () => {
       if (data.nombreOrganizacion && orgsData.length > 0) {
         const matched = orgsData.find(o => o.nombreOrganizacion === data.nombreOrganizacion);
         if (matched) {
-          setIdOrganizacion(matched.idOrganizacion.toString());
+          if (data.estadoMembresia === 'RECHAZADO') {
+            setIdOrganizacion('');
+            setPerteneceOrg(false); // Let them choose whether to join a new one
+          } else {
+            setIdOrganizacion(matched.idOrganizacion.toString());
+          }
         }
       }
       const pets = await getMisMascotas();
@@ -395,40 +400,38 @@ const Perfil = () => {
             <h3 className="text-lg font-bold text-slate-800 border-b pb-2">Filiación Institucional</h3>
 
             {/* BANNER INFORMATIVO DE ESTADO */}
-            {perteneceOrg && (
-              <div className="mb-4">
-                {descripcionTipoCuenta === 'ADMIN_ORG' && estadoOrganizacion === 'PENDIENTE' && (
-                  <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 text-yellow-700 rounded-r-xl">
-                    <p className="font-bold">Solicitud de Organización en Revisión</p>
-                    <p className="text-sm">Tu solicitud para registrar la organización está pendiente de aprobación por un administrador.</p>
-                  </div>
-                )}
-                {descripcionTipoCuenta === 'ADMIN_ORG' && estadoOrganizacion === 'RECHAZADA' && (
-                  <div className="bg-red-50 border-l-4 border-red-400 p-4 text-red-700 rounded-r-xl">
-                    <p className="font-bold">Solicitud Rechazada</p>
-                    <p className="text-sm">Tu solicitud para registrar la organización fue rechazada. Por favor, revisa los datos o contacta a soporte.</p>
-                  </div>
-                )}
-                {descripcionTipoCuenta !== 'ADMIN_ORG' && estadoMembresia === 'PENDIENTE' && (
-                  <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 text-yellow-700 rounded-r-xl">
-                    <p className="font-bold">Membresía en Revisión</p>
-                    <p className="text-sm">Tu solicitud para unirte a la organización está en espera de aprobación por el dueño.</p>
-                  </div>
-                )}
-                {estadoMembresia === 'RECHAZADO' && (
-                  <div className="bg-red-50 border-l-4 border-red-400 p-4 text-red-700 rounded-r-xl">
-                    <p className="font-bold">Membresía Rechazada</p>
-                    <p className="text-sm">Tu solicitud para unirte a la organización fue denegada.</p>
-                  </div>
-                )}
-                {estadoMembresia === 'APROBADO' && estadoOrganizacion === 'ACTIVA' && (
-                  <div className="bg-green-50 border-l-4 border-green-400 p-4 text-green-700 rounded-r-xl">
-                    <p className="font-bold">Miembro Activo</p>
-                    <p className="text-sm">Eres miembro activo de la organización.</p>
-                  </div>
-                )}
-              </div>
-            )}
+            <div className="mb-4">
+              {perteneceOrg && descripcionTipoCuenta === 'ADMIN_ORG' && estadoOrganizacion === 'PENDIENTE' && (
+                <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 text-yellow-700 rounded-r-xl">
+                  <p className="font-bold">Solicitud de Organización en Revisión</p>
+                  <p className="text-sm">Tu solicitud para registrar la organización está pendiente de aprobación por un administrador.</p>
+                </div>
+              )}
+              {perteneceOrg && descripcionTipoCuenta === 'ADMIN_ORG' && estadoOrganizacion === 'RECHAZADA' && (
+                <div className="bg-red-50 border-l-4 border-red-400 p-4 text-red-700 rounded-r-xl">
+                  <p className="font-bold">Solicitud Rechazada</p>
+                  <p className="text-sm">Tu solicitud para registrar la organización fue rechazada. Por favor, revisa los datos o contacta a soporte.</p>
+                </div>
+              )}
+              {perteneceOrg && descripcionTipoCuenta !== 'ADMIN_ORG' && estadoMembresia === 'PENDIENTE' && (
+                <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 text-yellow-700 rounded-r-xl">
+                  <p className="font-bold">Membresía en Revisión</p>
+                  <p className="text-sm">Tu solicitud para unirte a la organización está en espera de aprobación por el dueño.</p>
+                </div>
+              )}
+              {estadoMembresia === 'RECHAZADO' && (
+                <div className="bg-red-50 border-l-4 border-red-400 p-4 text-red-700 rounded-r-xl mb-4">
+                  <p className="font-bold">Membresía Rechazada</p>
+                  <p className="text-sm">Tu solicitud para unirte a la organización fue denegada. Puedes intentar con otra organización.</p>
+                </div>
+              )}
+              {perteneceOrg && estadoMembresia === 'APROBADO' && estadoOrganizacion === 'ACTIVA' && (
+                <div className="bg-green-50 border-l-4 border-green-400 p-4 text-green-700 rounded-r-xl">
+                  <p className="font-bold">Miembro Activo</p>
+                  <p className="text-sm">Eres miembro activo de la organización.</p>
+                </div>
+              )}
+            </div>
 
             {idOrganizacion ? (
               <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 space-y-4">
