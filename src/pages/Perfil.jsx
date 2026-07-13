@@ -33,6 +33,7 @@ const Perfil = () => {
   const [orgNombre, setOrgNombre] = useState('');
   const [orgDireccion, setOrgDireccion] = useState('');
   const [orgTelefono, setOrgTelefono] = useState('');
+  const [orgEmail, setOrgEmail] = useState('');
 
   const [profilePhoto, setProfilePhoto] = useState('');
   const [loading, setLoading] = useState(true);
@@ -155,7 +156,8 @@ const Perfil = () => {
           const newOrg = await createOrganizacion({
             nombreOrganizacion: orgNombre,
             direccion: orgDireccion,
-            telefono: orgTelefono
+            telefono: orgTelefono,
+            email: orgEmail
           });
           finalOrgId = newOrg.idOrganizacion;
         } else {
@@ -346,7 +348,11 @@ const Perfil = () => {
                     <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">RUT</span>
                     <span className="font-semibold text-slate-700 text-base">{organizaciones.find(o => o.idOrganizacion.toString() === idOrganizacion.toString())?.rut || 'N/A'}</span>
                   </div>
-                  <div className="md:col-span-2">
+                  <div>
+                    <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Email</span>
+                    <span className="font-semibold text-slate-700 text-base">{organizaciones.find(o => o.idOrganizacion.toString() === idOrganizacion.toString())?.email || 'N/A'}</span>
+                  </div>
+                  <div>
                     <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Dirección</span>
                     <span className="font-semibold text-slate-700 text-base">{organizaciones.find(o => o.idOrganizacion.toString() === idOrganizacion.toString())?.direccion || 'N/A'}</span>
                   </div>
@@ -418,6 +424,29 @@ const Perfil = () => {
                             onChange={(e) => setOrgNombre(e.target.value)}
                             className="w-full bg-white text-slate-800 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
                             placeholder="Ej: Patitas Felices"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-600 mb-1">Correo Electrónico (Contacto)</label>
+                          <input
+                            type="email"
+                            value={orgEmail}
+                            onChange={(e) => setOrgEmail(e.target.value)}
+                            className="w-full bg-white text-slate-800 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+                            placeholder="Ej: contacto@patitas.cl"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-600 mb-1">Teléfono (Contacto)</label>
+                          <input
+                            type="text"
+                            value={orgTelefono}
+                            onChange={(e) => setOrgTelefono(e.target.value)}
+                            className="w-full bg-white text-slate-800 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+                            placeholder="Ej: +5699999999"
+                            required
                           />
                         </div>
                         <div>
@@ -428,16 +457,7 @@ const Perfil = () => {
                             onChange={(e) => setOrgDireccion(e.target.value)}
                             className="w-full bg-white text-slate-800 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
                             placeholder="Ej: Calle Nueva 123"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-bold text-slate-600 mb-1">Teléfono</label>
-                          <input
-                            type="text"
-                            value={orgTelefono}
-                            onChange={(e) => setOrgTelefono(e.target.value)}
-                            className="w-full bg-white text-slate-800 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
-                            placeholder="Ej: +5699999999"
+                            required
                           />
                         </div>
                       </div>

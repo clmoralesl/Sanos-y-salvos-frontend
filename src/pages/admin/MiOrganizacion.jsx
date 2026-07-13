@@ -9,7 +9,7 @@ const MiOrganizacion = () => {
   const [error, setError] = useState(null);
 
   const [organizacion, setOrganizacion] = useState(null);
-  const [orgForm, setOrgForm] = useState({ direccion: '', telefono: '' });
+  const [orgForm, setOrgForm] = useState({ direccion: '', telefono: '', email: '' });
   const [savingOrg, setSavingOrg] = useState(false);
 
   const [solicitudes, setSolicitudes] = useState([]);
@@ -35,7 +35,7 @@ const MiOrganizacion = () => {
       const myOrg = allOrgs.find(o => o.idOrganizacion === miOrgId);
       if (myOrg) {
         setOrganizacion(myOrg);
-        setOrgForm({ direccion: myOrg.direccion || '', telefono: myOrg.telefono || '' });
+        setOrgForm({ direccion: myOrg.direccion || '', telefono: myOrg.telefono || '', email: myOrg.email || '' });
       }
 
       await loadUsers(miOrgId);
@@ -63,7 +63,8 @@ const MiOrganizacion = () => {
       await updateOrganizacion(organizacion.idOrganizacion, {
         ...organizacion,
         direccion: orgForm.direccion,
-        telefono: orgForm.telefono
+        telefono: orgForm.telefono,
+        email: orgForm.email
       });
       alert("Organización actualizada correctamente.");
     } catch (err) {
@@ -110,45 +111,48 @@ const MiOrganizacion = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
         {/* COLUMNA IZQUIERDA: DATOS DE ORG */}
-        <div className="lg:col-span-1 bg-white/80 backdrop-blur-md p-8 rounded-3xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] h-fit transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
-          <h3 className="text-xl font-bold text-slate-800 border-b border-slate-100 pb-3 mb-6 flex items-center gap-2">
+        <div className="lg:col-span-1 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm h-fit space-y-4">
+          <h3 className="text-lg font-bold text-slate-800 border-b pb-2">
              Datos de Contacto
           </h3>
-          <form onSubmit={handleOrgSubmit} className="space-y-5">
+          <form onSubmit={handleOrgSubmit} className="space-y-4 mt-4">
             <div>
-              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Nombre (No editable)</label>
-              <input type="text" value={organizacion?.nombreOrganizacion || ''} disabled className="w-full bg-slate-50 text-slate-500 border border-slate-200 rounded-xl px-4 py-2.5 cursor-not-allowed text-sm font-semibold" />
+              <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Nombre (No editable)</label>
+              <input type="text" value={organizacion?.nombreOrganizacion || ''} disabled className="w-full bg-slate-100 text-slate-500 border border-slate-200 rounded-xl px-4 py-2.5 cursor-not-allowed text-sm font-medium" />
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">RUT (No editable)</label>
-              <input type="text" value={organizacion?.rut || ''} disabled className="w-full bg-slate-50 text-slate-500 border border-slate-200 rounded-xl px-4 py-2.5 cursor-not-allowed text-sm font-semibold" />
+              <label className="block text-xs font-bold text-slate-500 uppercase mb-1">RUT (No editable)</label>
+              <input type="text" value={organizacion?.rut || ''} disabled className="w-full bg-slate-100 text-slate-500 border border-slate-200 rounded-xl px-4 py-2.5 cursor-not-allowed text-sm font-medium" />
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Dirección Física</label>
+              <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Dirección Física</label>
               <input 
                 type="text" 
                 value={orgForm.direccion} 
                 onChange={(e) => setOrgForm({...orgForm, direccion: e.target.value})}
-                className="w-full bg-white text-slate-800 border border-slate-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm font-medium transition-all shadow-sm" 
+                className="w-full bg-white text-slate-800 border border-slate-350 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-sm font-semibold" 
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Teléfono de Contacto</label>
+              <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Correo Electrónico de Contacto</label>
+              <input 
+                type="email" 
+                value={orgForm.email} 
+                onChange={(e) => setOrgForm({...orgForm, email: e.target.value})}
+                className="w-full bg-white text-slate-800 border border-slate-350 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-sm font-semibold" 
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Teléfono de Contacto</label>
               <input 
                 type="text" 
                 value={orgForm.telefono} 
                 onChange={(e) => setOrgForm({...orgForm, telefono: e.target.value})}
-                className="w-full bg-white text-slate-800 border border-slate-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm font-medium transition-all shadow-sm" 
+                className="w-full bg-white text-slate-800 border border-slate-350 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-sm font-semibold" 
               />
             </div>
-            <div className="pt-4">
-               <button 
-                 type="submit" 
-                 disabled={savingOrg} 
-                 className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-               >
-                 {savingOrg ? 'Guardando...' : '💾 Actualizar Datos'}
-               </button>
+            <div className="flex justify-end pt-4">
+              <Button type="submit" disabled={savingOrg}>{savingOrg ? 'Guardando...' : 'Guardar Cambios'}</Button>
             </div>
           </form>
         </div>
