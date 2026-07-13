@@ -82,10 +82,7 @@ const Perfil = () => {
       setEstadoOrganizacion(data.estadoOrganizacion || '');
       setDescripcionTipoCuenta(data.descripcionTipoCuenta || '');
 
-      const localPhoto = localStorage.getItem(`user_profile_photo_${data.idUsuario}`);
-      if (localPhoto) {
-        setProfilePhoto(localPhoto);
-      }
+      setProfilePhoto(data.urlFotoPerfil || '');
 
       if (data.nombreOrganizacion) {
         setPerteneceOrg(true);
@@ -141,14 +138,23 @@ const Perfil = () => {
     }
   };
 
-  const handlePhotoUpload = (e) => {
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+
+  const handlePhotoUpload = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProfilePhoto(reader.result);
-      };
-      reader.readAsDataURL(file);
+      try {
+        setUploadingPhoto(true);
+        const { subirImagenAS3 } = await import('../services/s3Service');
+        const publicUrl = await subirImagenAS3(file, 'perfil');
+        setProfilePhoto(publicUrl);
+        setToast({ message: 'Foto de perfil subida exitosamente.', type: 'success' });
+      } catch (err) {
+        console.error('Error al subir foto:', err);
+        setToast({ message: 'Error al subir la foto de perfil.', type: 'error' });
+      } finally {
+        setUploadingPhoto(false);
+      }
     }
   };
 
@@ -252,14 +258,9 @@ const Perfil = () => {
         email,
         telefono: buildPhone(telefono),
         idOrganizacion: finalOrgId,
-        idTipoCuenta: finalTipoCuenta
+        idTipoCuenta: finalTipoCuenta,
+        urlFotoPerfil: profilePhoto
       });
-
-      if (profilePhoto) {
-        localStorage.setItem(`user_profile_photo_${idUsuario}`, profilePhoto);
-      } else {
-        localStorage.removeItem(`user_profile_photo_${idUsuario}`);
-      }
 
       setMessage({ type: 'success', text: 'Perfil actualizado correctamente.' });
       await loadProfile();
@@ -306,7 +307,10 @@ const Perfil = () => {
 
       <form onSubmit={handleSave} className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="md:col-span-1 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col items-center space-y-4 h-fit">
-          <div className="w-32 h-32 bg-slate-100 rounded-full border border-gray-200 overflow-hidden relative group">
+          <div className="w-32 h-32 bg-slate-100 rounded-full border border-gray-200 overflow-hidden relative group flex items-center justify-center">
+            {uploadingPhoto ? (
+              <div className="absolute inset-0 bg-white/80 flex items-center justify-center text-xs font-bold text-blue-600 animate-pulse">Subiendo...</div>
+            ) : null}
             <img
               src={profilePhoto || '/user_avatar_placeholder.jpg'}
               alt="Avatar"
@@ -314,13 +318,14 @@ const Perfil = () => {
             />
           </div>
           <div className="w-full text-center">
-            <label className="bg-slate-50 hover:bg-slate-100 border text-slate-700 text-xs font-bold py-2 px-3 rounded-lg cursor-pointer transition shadow-sm inline-block">
-              📷 Cambiar Foto
+            <label className={`bg-slate-50 hover:bg-slate-100 border text-slate-700 text-xs font-bold py-2 px-3 rounded-lg cursor-pointer transition shadow-sm inline-block ${uploadingPhoto ? 'opacity-50 pointer-events-none' : ''}`}>
+              {uploadingPhoto ? 'Subiendo...' : '📷 Cambiar Foto'}
               <input
                 type="file"
                 accept="image/*"
                 onChange={handlePhotoUpload}
                 className="hidden"
+                disabled={uploadingPhoto}
               />
             </label>
             {profilePhoto && (

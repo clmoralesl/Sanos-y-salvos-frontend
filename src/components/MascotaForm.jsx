@@ -37,20 +37,31 @@ const MascotaForm = ({ initialData, onSubmit, onCancel, showNombreDesconocidoOpt
     }
   };
 
-  const processFiles = (files) => {
+  const [isUploading, setIsUploading] = useState(false);
+
+  const processFiles = async (files) => {
     const fileList = Array.from(files);
-    fileList.forEach(file => {
-      if (file.type.startsWith('image/')) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setFormData(prev => ({
-            ...prev,
-            urlsFotografias: [...prev.urlsFotografias, reader.result]
-          }));
-        };
-        reader.readAsDataURL(file);
-      }
-    });
+    setIsUploading(true);
+    try {
+      const { subirImagenAS3 } = await import('../services/s3Service');
+      const uploadPromises = fileList.map(async (file) => {
+        if (file.type.startsWith('image/')) {
+          const publicUrl = await subirImagenAS3(file, 'mascota');
+          return publicUrl;
+        }
+        return null;
+      });
+      const urls = await Promise.all(uploadPromises);
+      const validUrls = urls.filter(url => url !== null);
+      setFormData(prev => ({
+        ...prev,
+        urlsFotografias: [...prev.urlsFotografias, ...validUrls]
+      }));
+    } catch (err) {
+      console.error('Error al subir imágenes:', err);
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleDragOver = (e) => {
@@ -401,8 +412,14 @@ const MascotaForm = ({ initialData, onSubmit, onCancel, showNombreDesconocidoOpt
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
-          onClick={() => document.getElementById('pet-photo-input').click()}
+          onClick={() => {
+            if (!isUploading) {
+              document.getElementById('pet-photo-input').click();
+            }
+          }}
           className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all ${
+            isUploading ? 'opacity-50 pointer-events-none' : ''
+          } ${
             isDragging 
               ? 'border-blue-500 bg-blue-50/50 scale-[1.01]' 
               : 'border-slate-300 hover:border-blue-400 bg-slate-50 hover:bg-slate-100/50'
@@ -415,9 +432,12 @@ const MascotaForm = ({ initialData, onSubmit, onCancel, showNombreDesconocidoOpt
             multiple
             onChange={handleFileChange}
             className="hidden"
+            disabled={isUploading}
           />
-          <div className="text-4xl mb-2">📸</div>
-          <p className="text-sm font-bold text-slate-700">Subir imágenes o arrastrar aquí</p>
+          <div className="text-4xl mb-2">{isUploading ? '⏳' : '📸'}</div>
+          <p className="text-sm font-bold text-slate-700">
+            {isUploading ? 'Subiendo y optimizando imágenes...' : 'Subir imágenes o arrastrar aquí'}
+          </p>
           <p className="text-xs text-slate-400 mt-1">Soporta múltiples imágenes (.jpg, .png)</p>
         </div>
         {formData.urlsFotografias && formData.urlsFotografias.length > 0 && (
@@ -458,7 +478,9 @@ const MascotaForm = ({ initialData, onSubmit, onCancel, showNombreDesconocidoOpt
         >
           &larr; Volver atrás
         </Button>
-        <Button type="submit">Guardar Mascota</Button>
+        <Button type="submit" disabled={isUploading}>
+          {isUploading ? 'Subiendo...' : 'Guardar Mascota'}
+        </Button>
       </div>
     </form>
   );
