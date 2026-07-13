@@ -23,7 +23,7 @@ const Usuarios = () => {
     try {
       setLoading(true);
       const data = await getUsuarios();
-      setUsuarios(data);
+      setUsuarios(data.filter(u => u.estadoMembresia !== 'PENDIENTE'));
       setError(null);
     } catch (err) {
       console.error("Error fetching usuarios:", err);
@@ -77,14 +77,7 @@ const Usuarios = () => {
     }
   };
 
-  const handleUpdateMembresia = async (id, estado) => {
-    try {
-      await updateUsuarioMembresia(id, estado);
-      fetchUsuarios();
-    } catch (err) {
-      alert("Error al actualizar membresía");
-    }
-  };
+
 
   return (
     <div className="space-y-6">
@@ -122,12 +115,7 @@ const Usuarios = () => {
                 </span>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                {usuario.estadoMembresia === 'PENDIENTE' && (
-                  <>
-                    <button onClick={() => handleUpdateMembresia(usuario.idUsuario, 'APROBADO')} className="text-green-600 hover:text-green-900">Aprobar</button>
-                    <button onClick={() => handleUpdateMembresia(usuario.idUsuario, 'RECHAZADO')} className="text-red-600 hover:text-red-900">Rechazar</button>
-                  </>
-                )}
+
                 <button onClick={() => handleOpenForm(usuario)} className="text-blue-600 hover:text-blue-900">Editar</button>
                 <button onClick={() => handleOpenDelete(usuario)} className="text-red-600 hover:text-red-900">Eliminar</button>
               </td>

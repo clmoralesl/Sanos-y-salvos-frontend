@@ -23,7 +23,7 @@ const Organizaciones = () => {
     try {
       setLoading(true);
       const data = await getOrganizaciones();
-      setOrganizaciones(data);
+      setOrganizaciones(data.filter(org => org.estado !== 'PENDIENTE'));
       setError(null);
     } catch (err) {
       console.error("Error fetching organizaciones:", err);
@@ -71,14 +71,7 @@ const Organizaciones = () => {
     }
   };
 
-  const handleUpdateEstado = async (id, estado) => {
-    try {
-      await updateOrganizacionEstado(id, estado);
-      fetchOrganizaciones();
-    } catch (err) {
-      alert("Error al actualizar estado");
-    }
-  };
+
 
   return (
     <div className="space-y-6">
@@ -111,12 +104,7 @@ const Organizaciones = () => {
                 </span>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                {org.estado === 'PENDIENTE' && (
-                  <>
-                    <button onClick={() => handleUpdateEstado(org.idOrganizacion, 'ACTIVA')} className="text-green-600 hover:text-green-900">Aprobar</button>
-                    <button onClick={() => handleUpdateEstado(org.idOrganizacion, 'RECHAZADA')} className="text-red-600 hover:text-red-900">Rechazar</button>
-                  </>
-                )}
+
                 <button onClick={() => handleOpenForm(org)} className="text-blue-600 hover:text-blue-900">Editar</button>
                 <button onClick={() => handleOpenDelete(org)} className="text-red-600 hover:text-red-900">Eliminar</button>
               </td>

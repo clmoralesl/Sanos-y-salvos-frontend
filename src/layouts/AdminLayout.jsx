@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
 import { setupInterceptors } from '../services/api';
@@ -8,13 +8,17 @@ const AdminLayout = () => {
   const navigate = useNavigate();
   const { isAuthenticated, getAccessTokenSilently, isLoading, loginWithRedirect, user: auth0User } = useAuth0();
 
+  const [userRole, setUserRole] = useState(null);
+
   useEffect(() => {
     if (isAuthenticated) {
       setupInterceptors(getAccessTokenSilently);
       const checkUserProfile = async () => {
         try {
           const profile = await getMe();
-          const userIsAdmin = (profile.descripcionTipoCuenta === 'SUPER_ADMIN' || profile.descripcionTipoCuenta === 'ADMIN_ORG') ||
+          setUserRole(profile.descripcionTipoCuenta);
+          const userIsAdmin = (profile.descripcionTipoCuenta === 'SUPER_ADMIN') ||
+                              (profile.descripcionTipoCuenta === 'ADMIN_ORG' && profile.estadoMembresia === 'APROBADO' && profile.estadoOrganizacion === 'ACTIVA') ||
                               (auth0User?.['https://sanosysalvos.cl/roles']?.includes('admin')) ||
                               (auth0User?.['https://sanosysalvos.cl/role'] === 'admin') ||
                               (auth0User?.['roles']?.includes('admin')) ||
@@ -38,6 +42,8 @@ const AdminLayout = () => {
       const user = JSON.parse(userJson);
       if (user.role !== 'admin') {
         navigate('/');
+      } else {
+        setUserRole('SUPER_ADMIN'); // mock role for local admin
       }
     }
   }, [isAuthenticated, getAccessTokenSilently, isLoading, navigate, loginWithRedirect]);
@@ -54,10 +60,23 @@ const AdminLayout = () => {
         </div>
         <nav className="flex-grow p-4 space-y-2">
           <Link to="/admin" className="block p-3 rounded hover:bg-slate-700 transition">Dashboard</Link>
-          <Link to="/admin/usuarios" className="block p-3 rounded hover:bg-slate-700 transition">Usuarios</Link>
           <Link to="/admin/mascotas" className="block p-3 rounded hover:bg-slate-700 transition">Mascotas</Link>
           <Link to="/admin/reportes" className="block p-3 rounded hover:bg-slate-700 transition">Reportes</Link>
-          <Link to="/admin/organizaciones" className="block p-3 rounded hover:bg-slate-700 transition">Organizaciones</Link>
+          
+          {userRole === 'SUPER_ADMIN' && (
+            <>
+              <Link to="/admin/organizaciones" className="block p-3 rounded hover:bg-slate-700 transition">Organizaciones</Link>
+              <Link to="/admin/solicitudes-org" className="block p-3 rounded hover:bg-slate-700 transition text-yellow-400 font-medium">Solicitudes de Org.</Link>
+              <Link to="/admin/usuarios" className="block p-3 rounded hover:bg-slate-700 transition">Usuarios</Link>
+            </>
+          )}
+
+          {userRole === 'ADMIN_ORG' && (
+            <>
+              <Link to="/admin/usuarios" className="block p-3 rounded hover:bg-slate-700 transition">Mis Voluntarios</Link>
+              <Link to="/admin/solicitudes-voluntarios" className="block p-3 rounded hover:bg-slate-700 transition text-yellow-400 font-medium">Solicitudes de Voluntarios</Link>
+            </>
+          )}
         </nav>
         <div className="p-4 border-t border-slate-700">
           <Link to="/" className="text-sm text-slate-400 hover:text-white">Volver al Sitio</Link>
