@@ -65,17 +65,15 @@ const AdminLayout = () => {
           
           {userRole === 'SUPER_ADMIN' && (
             <>
-              <Link to="/admin/organizaciones" className="block p-3 rounded hover:bg-slate-700 transition">Organizaciones</Link>
-              <Link to="/admin/solicitudes-org" className="block p-3 rounded hover:bg-slate-700 transition text-yellow-400 font-medium">Solicitudes de Org.</Link>
-              <Link to="/admin/usuarios" className="block p-3 rounded hover:bg-slate-700 transition">Usuarios</Link>
+              <NavLink to="/admin/usuarios" className={({isActive}) => `block py-2.5 px-4 rounded transition duration-200 ${isActive ? 'bg-blue-700' : 'hover:bg-blue-700'}`}>Mantenedor Usuarios</NavLink>
+              <NavLink to="/admin/mascotas" className={({isActive}) => `block py-2.5 px-4 rounded transition duration-200 ${isActive ? 'bg-blue-700' : 'hover:bg-blue-700'}`}>Mantenedor Mascotas</NavLink>
+              <NavLink to="/admin/organizaciones" className={({isActive}) => `block py-2.5 px-4 rounded transition duration-200 ${isActive ? 'bg-blue-700' : 'hover:bg-blue-700'}`}>Mantenedor Org.</NavLink>
+              <NavLink to="/admin/solicitudes-org" className={({isActive}) => `block py-2.5 px-4 rounded transition duration-200 text-yellow-300 font-bold ${isActive ? 'bg-blue-700' : 'hover:bg-blue-700'}`}>Solicitudes de Org.</NavLink>
             </>
           )}
 
           {userRole === 'ADMIN_ORG' && (
-            <>
-              <Link to="/admin/usuarios" className="block p-3 rounded hover:bg-slate-700 transition">Mis Voluntarios</Link>
-              <Link to="/admin/solicitudes-voluntarios" className="block p-3 rounded hover:bg-slate-700 transition text-yellow-400 font-medium">Solicitudes de Voluntarios</Link>
-            </>
+            <NavLink to="/admin/mi-organizacion" className={({isActive}) => `block py-2.5 px-4 rounded transition duration-200 ${isActive ? 'bg-blue-700' : 'hover:bg-blue-700'}`}>Mi Organización</NavLink>
           )}
         </nav>
         <div className="p-4 border-t border-slate-700">

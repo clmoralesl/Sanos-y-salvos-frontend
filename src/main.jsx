@@ -19,7 +19,7 @@ import Mascotas from './pages/admin/Mascotas'
 import Reportes from './pages/admin/Reportes'
 import Organizaciones from './pages/admin/Organizaciones'
 import SolicitudesOrganizaciones from './pages/admin/SolicitudesOrganizaciones'
-import SolicitudesUsuarios from './pages/admin/SolicitudesUsuarios'
+import MiOrganizacion from './pages/admin/MiOrganizacion'
 import AdminReporteDetalle from './pages/admin/AdminReporteDetalle'
 
 const domain = import.meta.env.VITE_AUTH0_DOMAIN
@@ -58,7 +58,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
             <Route path="reportes/:id" element={<AdminReporteDetalle />} />
             <Route path="organizaciones" element={<Organizaciones />} />
             <Route path="solicitudes-org" element={<SolicitudesOrganizaciones />} />
-            <Route path="solicitudes-voluntarios" element={<SolicitudesUsuarios />} />
+            <Route path="mi-organizacion" element={<MiOrganizacion />} />
           </Route>
 
           <Route path="*" element={<div className="h-screen flex items-center justify-center">404 - Página no encontrada</div>} />

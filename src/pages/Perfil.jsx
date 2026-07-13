@@ -25,6 +25,11 @@ const Perfil = () => {
   const [idOrganizacion, setIdOrganizacion] = useState('');
   const [organizaciones, setOrganizaciones] = useState([]);
 
+  // States for banner
+  const [estadoMembresia, setEstadoMembresia] = useState('');
+  const [estadoOrganizacion, setEstadoOrganizacion] = useState('');
+  const [descripcionTipoCuenta, setDescripcionTipoCuenta] = useState('');
+
   const [orgNombre, setOrgNombre] = useState('');
   const [orgDireccion, setOrgDireccion] = useState('');
   const [orgTelefono, setOrgTelefono] = useState('');
@@ -55,6 +60,10 @@ const Perfil = () => {
       setEmail(data.email);
       setTelefono(data.telefono || '');
       setIdTipoCuenta(data.idTipoCuenta || 1);
+      
+      setEstadoMembresia(data.estadoMembresia || '');
+      setEstadoOrganizacion(data.estadoOrganizacion || '');
+      setDescripcionTipoCuenta(data.descripcionTipoCuenta || '');
 
       const localPhoto = localStorage.getItem(`user_profile_photo_${data.idUsuario}`);
       if (localPhoto) {
@@ -214,6 +223,42 @@ const Perfil = () => {
           message.type === 'success' ? 'bg-green-50 border-green-200 text-green-700' : 'bg-red-50 border-red-200 text-red-700'
         }`}>
           {message.type === 'success' ? '✓ ' : '⚠️ '} {message.text}
+        </div>
+      )}
+
+      {/* BANNER INFORMATIVO DE ESTADO */}
+      {perteneceOrg && (
+        <div className="mb-6">
+          {descripcionTipoCuenta === 'ADMIN_ORG' && estadoOrganizacion === 'PENDIENTE' && (
+            <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 text-yellow-700 rounded-r-xl">
+              <p className="font-bold">Solicitud de Organización en Revisión</p>
+              <p className="text-sm">Tu solicitud para registrar la organización está pendiente de aprobación por un Súper Administrador.</p>
+            </div>
+          )}
+          {descripcionTipoCuenta === 'ADMIN_ORG' && estadoOrganizacion === 'RECHAZADA' && (
+            <div className="bg-red-50 border-l-4 border-red-400 p-4 text-red-700 rounded-r-xl">
+              <p className="font-bold">Solicitud Rechazada</p>
+              <p className="text-sm">Tu solicitud para registrar la organización fue rechazada. Por favor, revisa los datos o contacta a soporte.</p>
+            </div>
+          )}
+          {descripcionTipoCuenta !== 'ADMIN_ORG' && estadoMembresia === 'PENDIENTE' && (
+            <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 text-yellow-700 rounded-r-xl">
+              <p className="font-bold">Membresía en Revisión</p>
+              <p className="text-sm">Tu solicitud para unirte a la organización está en espera de aprobación por el dueño.</p>
+            </div>
+          )}
+          {estadoMembresia === 'RECHAZADO' && (
+            <div className="bg-red-50 border-l-4 border-red-400 p-4 text-red-700 rounded-r-xl">
+              <p className="font-bold">Membresía Rechazada</p>
+              <p className="text-sm">Tu solicitud para unirte a la organización fue denegada.</p>
+            </div>
+          )}
+          {estadoMembresia === 'APROBADO' && estadoOrganizacion === 'ACTIVA' && (
+            <div className="bg-green-50 border-l-4 border-green-400 p-4 text-green-700 rounded-r-xl">
+              <p className="font-bold">Miembro Activo</p>
+              <p className="text-sm">Eres miembro activo de la organización.</p>
+            </div>
+          )}
         </div>
       )}
 
