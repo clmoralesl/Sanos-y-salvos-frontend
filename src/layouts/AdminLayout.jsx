@@ -3,6 +3,7 @@ import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
 import { setupInterceptors } from '../services/api';
 import { getMe } from '../services/usuarioService';
+import NotificationBell from '../components/NotificationBell';
 
 const AdminLayout = () => {
   const navigate = useNavigate();
@@ -11,6 +12,7 @@ const AdminLayout = () => {
   const [userRole, setUserRole] = useState(null);
   const [profilePhoto, setProfilePhoto] = useState('');
   const [userName, setUserName] = useState('');
+  const [dbProfile, setDbProfile] = useState(null);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -19,6 +21,7 @@ const AdminLayout = () => {
         try {
           const profile = await getMe();
           setUserName(profile.nombre);
+          setDbProfile(profile);
           
           const photo = localStorage.getItem(`user_profile_photo_${profile.idUsuario}`);
           if (photo) {
@@ -125,6 +128,7 @@ const AdminLayout = () => {
               <p className="text-sm font-bold text-slate-800">{userName}</p>
               <p className="text-xs font-semibold text-blue-600">Súper Administrador</p>
             </div>
+            <NotificationBell dbProfile={dbProfile} />
             <div className="w-10 h-10 rounded-full bg-slate-200 border-2 border-white shadow-sm overflow-hidden flex items-center justify-center text-xl">
               {profilePhoto ? <img src={profilePhoto} alt="Perfil" className="w-full h-full object-cover" /> : '👤'}
             </div>

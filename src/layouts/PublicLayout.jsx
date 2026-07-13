@@ -3,6 +3,7 @@ import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
 import { setupInterceptors } from '../services/api';
 import { getMe } from '../services/usuarioService';
+import NotificationBell from '../components/NotificationBell';
 
 const PublicLayout = () => {
   const { loginWithRedirect, logout, user: auth0User, isAuthenticated, getAccessTokenSilently } = useAuth0();
@@ -89,6 +90,7 @@ const PublicLayout = () => {
                   )}
                   <span>{dbProfile?.nombre || auth0User?.name || auth0User?.email}</span>
                 </span>
+                <NotificationBell dbProfile={dbProfile} />
                 <button
                   onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
                   className="text-red-500 hover:text-red-700 font-bold transition"
