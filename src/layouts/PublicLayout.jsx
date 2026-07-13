@@ -62,7 +62,7 @@ const PublicLayout = () => {
                 <Link to="/mis-reportes" className="hover:text-blue-600 transition">Mis Reportes</Link>
                 <Link to="/perfil" className="hover:text-blue-600 transition">Mi Perfil</Link>
                 {((localUser?.role === 'admin') || 
-                  (dbProfile?.descripcionTipoCuenta?.toLowerCase() === 'administrador') ||
+                  (dbProfile?.descripcionTipoCuenta === 'SUPER_ADMIN' || dbProfile?.descripcionTipoCuenta === 'ADMIN_ORG') ||
                   (auth0User?.['https://sanosysalvos.cl/roles']?.includes('admin')) ||
                   (auth0User?.['https://sanosysalvos.cl/role'] === 'admin') ||
                   (auth0User?.['roles']?.includes('admin')) ||

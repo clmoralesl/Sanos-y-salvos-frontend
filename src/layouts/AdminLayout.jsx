@@ -14,7 +14,7 @@ const AdminLayout = () => {
       const checkUserProfile = async () => {
         try {
           const profile = await getMe();
-          const userIsAdmin = (profile.descripcionTipoCuenta?.toLowerCase() === 'administrador') ||
+          const userIsAdmin = (profile.descripcionTipoCuenta === 'SUPER_ADMIN' || profile.descripcionTipoCuenta === 'ADMIN_ORG') ||
                               (auth0User?.['https://sanosysalvos.cl/roles']?.includes('admin')) ||
                               (auth0User?.['https://sanosysalvos.cl/role'] === 'admin') ||
                               (auth0User?.['roles']?.includes('admin')) ||
