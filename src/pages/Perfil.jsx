@@ -340,6 +340,9 @@ const Perfil = () => {
             {idOrganizacion ? (
               <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  <div className="md:col-span-2 border-b border-slate-200 pb-2 mb-2">
+                    <h4 className="font-bold text-slate-600">Datos de la Organización</h4>
+                  </div>
                   <div>
                     <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Nombre Organización</span>
                     <span className="font-bold text-slate-800 text-base">{organizaciones.find(o => o.idOrganizacion.toString() === idOrganizacion.toString())?.nombreOrganizacion || 'No disponible'}</span>
@@ -349,12 +352,32 @@ const Perfil = () => {
                     <span className="font-semibold text-slate-700 text-base">{organizaciones.find(o => o.idOrganizacion.toString() === idOrganizacion.toString())?.rut || 'N/A'}</span>
                   </div>
                   <div>
-                    <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Email</span>
+                    <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Email de Contacto</span>
                     <span className="font-semibold text-slate-700 text-base">{organizaciones.find(o => o.idOrganizacion.toString() === idOrganizacion.toString())?.email || 'N/A'}</span>
                   </div>
                   <div>
+                    <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Teléfono de Contacto</span>
+                    <span className="font-semibold text-slate-700 text-base">{organizaciones.find(o => o.idOrganizacion.toString() === idOrganizacion.toString())?.telefono || 'N/A'}</span>
+                  </div>
+                  <div className="md:col-span-2">
                     <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Dirección</span>
                     <span className="font-semibold text-slate-700 text-base">{organizaciones.find(o => o.idOrganizacion.toString() === idOrganizacion.toString())?.direccion || 'N/A'}</span>
+                  </div>
+
+                  <div className="md:col-span-2 border-b border-slate-200 pb-2 mt-4 mb-2">
+                    <h4 className="font-bold text-slate-600">Datos del Representante</h4>
+                  </div>
+                  <div className="md:col-span-2">
+                    <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Nombre Representante</span>
+                    <span className="font-semibold text-slate-700 text-base">{organizaciones.find(o => o.idOrganizacion.toString() === idOrganizacion.toString())?.nombreRepresentante || 'No disponible'}</span>
+                  </div>
+                  <div>
+                    <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Email Representante</span>
+                    <span className="font-semibold text-slate-700 text-base">{organizaciones.find(o => o.idOrganizacion.toString() === idOrganizacion.toString())?.emailRepresentante || 'N/A'}</span>
+                  </div>
+                  <div>
+                    <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Teléfono Representante</span>
+                    <span className="font-semibold text-slate-700 text-base">{organizaciones.find(o => o.idOrganizacion.toString() === idOrganizacion.toString())?.telefonoRepresentante || 'N/A'}</span>
                   </div>
                 </div>
                 <p className="text-xs text-amber-600 font-bold mt-4 pt-4 border-t border-slate-200">
