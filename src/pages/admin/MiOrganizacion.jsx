@@ -4,7 +4,12 @@ import { getUsuarios, updateUsuarioMembresia, getMe } from '../../services/usuar
 import Table from '../../components/Table';
 import Button from '../../components/Button';
 
+import { useNavigate } from 'react-router-dom';
+import { useAuth0 } from '@auth0/auth0-react';
+
 const MiOrganizacion = () => {
+  const navigate = useNavigate();
+  const { isAuthenticated, isLoading: authLoading } = useAuth0();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -16,8 +21,13 @@ const MiOrganizacion = () => {
   const [voluntarios, setVoluntarios] = useState([]);
 
   useEffect(() => {
+    if (authLoading) return;
+    if (!isAuthenticated && !localStorage.getItem('currentUser')) {
+      navigate('/login');
+      return;
+    }
     loadDashboard();
-  }, []);
+  }, [isAuthenticated, authLoading]);
 
   const loadDashboard = async () => {
     try {
