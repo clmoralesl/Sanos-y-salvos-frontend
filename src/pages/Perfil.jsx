@@ -228,6 +228,76 @@ const Perfil = () => {
         </div>
       )}
 
+      <form onSubmit={handleSave} className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="md:col-span-1 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col items-center space-y-4 h-fit">
+          <div className="w-32 h-32 bg-slate-100 rounded-full border border-gray-200 overflow-hidden relative group">
+            <img
+              src={profilePhoto || '/user_avatar_placeholder.jpg'}
+              alt="Avatar"
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div className="w-full text-center">
+            <label className="bg-slate-50 hover:bg-slate-100 border text-slate-700 text-xs font-bold py-2 px-3 rounded-lg cursor-pointer transition shadow-sm inline-block">
+              📷 Cambiar Foto
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handlePhotoUpload}
+                className="hidden"
+              />
+            </label>
+            {profilePhoto && (
+              <button
+                type="button"
+                onClick={() => setProfilePhoto('')}
+                className="block text-[10px] text-red-500 font-bold hover:underline mt-2 mx-auto"
+              >
+                Eliminar foto
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="md:col-span-2 space-y-6">
+          <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-4">
+            <h3 className="text-lg font-bold text-slate-800 border-b pb-2">Información Personal</h3>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Correo Electrónico</label>
+                <input
+                  type="text"
+                  value={email}
+                  disabled
+                  className="w-full bg-slate-100 text-slate-500 border border-slate-200 rounded-xl px-4 py-2.5 cursor-not-allowed text-sm font-medium"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Nombre Completo</label>
+                <input
+                  type="text"
+                  value={nombre}
+                  onChange={(e) => setNombre(e.target.value)}
+                  className="w-full bg-white text-slate-800 border border-slate-350 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-sm font-semibold"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Teléfono</label>
+                <input
+                  type="text"
+                  value={telefono}
+                  onChange={(e) => setTelefono(e.target.value)}
+                  className="w-full bg-white text-slate-800 border border-slate-350 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-sm font-semibold"
+                  placeholder="Ej: +56912345678"
+                />
+              </div>
+            </div>
+          </div>
+
           <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-4">
             <h3 className="text-lg font-bold text-slate-800 border-b pb-2">Filiación Institucional</h3>
 
