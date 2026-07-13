@@ -146,8 +146,8 @@ const Perfil = () => {
       let finalTipoCuenta = 1;
 
       if (perteneceOrg) {
-        finalTipoCuenta = 2;
         if (orgMode === 'create') {
+          finalTipoCuenta = 2;
           if (!orgNombre.trim()) {
             setMessage({ type: 'error', text: 'El nombre de la organización es obligatorio.' });
             setSaving(false);
@@ -161,6 +161,7 @@ const Perfil = () => {
           });
           finalOrgId = newOrg.idOrganizacion;
         } else {
+          finalTipoCuenta = 1;
           if (!idOrganizacion) {
             setMessage({ type: 'error', text: 'Por favor selecciona una organización.' });
             setSaving(false);

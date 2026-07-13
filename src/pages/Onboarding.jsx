@@ -85,8 +85,8 @@ const Onboarding = () => {
       let finalTipoCuenta = 1; 
 
       if (perteneceOrg) {
-        finalTipoCuenta = 2; 
         if (orgMode === 'create') {
+          finalTipoCuenta = 2; 
           if (!orgNombre.trim() || !orgRut.trim() || !orgRutRepresentante.trim() || !orgEmail.trim() || !orgTelefono.trim()) {
             setErrorMsg('Todos los campos de la organización, incluyendo correo y teléfono de contacto, son obligatorios.');
             setLoadingSubmit(false);
@@ -102,6 +102,7 @@ const Onboarding = () => {
           });
           finalOrgId = newOrg.idOrganizacion;
         } else {
+          finalTipoCuenta = 1; 
           if (!idOrganizacion) {
             setErrorMsg('Por favor selecciona una organización de la lista.');
             setLoadingSubmit(false);

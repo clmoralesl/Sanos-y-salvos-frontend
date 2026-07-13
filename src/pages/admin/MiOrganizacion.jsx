@@ -158,10 +158,10 @@ const MiOrganizacion = () => {
         </div>
 
         {/* COLUMNA DERECHA: VOLUNTARIOS Y SOLICITUDES */}
-        <div className="lg:col-span-2 space-y-8">
+        <div className="lg:col-span-2 space-y-6">
           
-          <div className="bg-white/80 backdrop-blur-md p-8 rounded-3xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-            <h3 className="text-xl font-bold text-slate-800 border-b border-slate-100 pb-3 mb-6 flex items-center gap-2">
+          <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+            <h3 className="text-lg font-bold text-slate-800 border-b pb-2 mb-4 flex items-center gap-2">
                🔔 Solicitudes Pendientes
                {solicitudes.length > 0 && <span className="bg-amber-100 text-amber-700 text-xs py-0.5 px-2 rounded-full font-black">{solicitudes.length}</span>}
             </h3>
@@ -191,8 +191,8 @@ const MiOrganizacion = () => {
             </div>
           </div>
 
-          <div className="bg-white/80 backdrop-blur-md p-8 rounded-3xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-            <h3 className="text-xl font-bold text-slate-800 border-b border-slate-100 pb-3 mb-6 flex items-center gap-2">
+          <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+            <h3 className="text-lg font-bold text-slate-800 border-b pb-2 mb-4 flex items-center gap-2">
                👥 Voluntarios Activos
                {voluntarios.length > 0 && <span className="bg-emerald-100 text-emerald-700 text-xs py-0.5 px-2 rounded-full font-black">{voluntarios.length}</span>}
             </h3>
