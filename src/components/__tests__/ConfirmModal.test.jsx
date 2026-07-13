@@ -40,4 +40,21 @@ describe('ConfirmModal', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
+  it('debe renderizar como primario si type no es danger', () => {
+    const { container } = render(
+      <ConfirmModal
+        isOpen={true}
+        title="Aceptar"
+        message="¿Aceptar?"
+        type="primary"
+        confirmText="OK"
+        onClose={() => {}}
+        onConfirm={() => {}}
+      />
+    );
+
+    const btn = screen.getByText('OK');
+    expect(btn.className).toContain('bg-blue-600');
+  });
+
 });
