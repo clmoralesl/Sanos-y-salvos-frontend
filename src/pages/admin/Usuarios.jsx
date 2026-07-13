@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getMe, registrarUsuario, updateMe, deleteMe } from '../../services/usuarioService';
+import { getUsuarios, getMe, registrarUsuario, updateMe, deleteMe, updateUsuarioMembresia } from '../../services/usuarioService';
 import Table from '../../components/Table';
 import Button from '../../components/Button';
 import Modal from '../../components/Modal';
@@ -10,7 +10,6 @@ const Usuarios = () => {
   const [usuarios, setUsuarios] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
   
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -23,19 +22,15 @@ const Usuarios = () => {
   const fetchUsuarios = async () => {
     try {
       setLoading(true);
-      const me = await getMe();
-      setUsuarios([
-        me,
-        { idUsuario: 2, nombre: 'Juan Soto', email: 'juan@mail.com', telefono: '555-0101', tipoCuenta: 'Estándar' },
-        { idUsuario: 3, nombre: 'Refugio San Francisco', email: 'contacto@refugio.org', telefono: '555-0202', tipoCuenta: 'Organización' },
-      ]);
+      const data = await getUsuarios();
+      setUsuarios(data);
       setError(null);
     } catch (err) {
       console.error("Error fetching usuarios:", err);
       setError("No se pudieron cargar los usuarios.");
       setUsuarios([
-        { idUsuario: 1, nombre: 'Maria Perez (Mock)', email: 'maria@mail.com', telefono: '555-5555', tipoCuenta: 'Estándar' },
-        { idUsuario: 2, nombre: 'Juan Soto (Mock)', email: 'juan@mail.com', telefono: '555-0101', tipoCuenta: 'Estándar' },
+        { idUsuario: 1, nombre: 'Maria Perez (Mock)', email: 'maria@mail.com', telefono: '555-5555', tipoCuenta: 'Estándar', estadoMembresia: 'NINGUNO' },
+        { idUsuario: 2, nombre: 'Juan Soto (Mock)', email: 'juan@mail.com', telefono: '555-0101', tipoCuenta: 'Estándar', estadoMembresia: 'PENDIENTE' },
       ]);
     } finally {
       setLoading(false);
@@ -55,7 +50,6 @@ const Usuarios = () => {
   const handleFormSubmit = async (formData) => {
     try {
       if (selectedUser) {
-        
         if (selectedUser.idUsuario === 1) {
           await updateMe(formData);
         } else {
@@ -83,10 +77,19 @@ const Usuarios = () => {
     }
   };
 
+  const handleUpdateMembresia = async (id, estado) => {
+    try {
+      await updateUsuarioMembresia(id, estado);
+      fetchUsuarios();
+    } catch (err) {
+      alert("Error al actualizar membresía");
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-800">Mantenedor de Usuarios</h2>
+        <h2 className="text-2xl font-bold text-gray-800">Mantenedor de Usuarios (y Voluntarios)</h2>
         <Button onClick={() => handleOpenForm()}>
           + Nuevo Usuario
         </Button>
@@ -101,55 +104,43 @@ const Usuarios = () => {
       {loading ? (
         <div className="text-center py-10">Cargando usuarios...</div>
       ) : (
-        <Table headers={['ID', 'Nombre', 'Email', 'Teléfono', 'Tipo Cuenta', 'Acciones']}>
+        <Table headers={['ID', 'Nombre', 'Email', 'Teléfono', 'Tipo Cuenta', 'Estado Membresía', 'Acciones']}>
           {usuarios.map((usuario) => (
             <tr key={usuario.idUsuario}>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{usuario.idUsuario}</td>
               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{usuario.nombre}</td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{usuario.email}</td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{usuario.telefono}</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{usuario.tipoCuenta || 'Estándar'}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{usuario.descripcionTipoCuenta || usuario.tipoCuenta || 'Estándar'}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                  usuario.estadoMembresia === 'APROBADO' ? 'bg-green-100 text-green-800' :
+                  usuario.estadoMembresia === 'PENDIENTE' ? 'bg-yellow-100 text-yellow-800' :
+                  'bg-gray-100 text-gray-800'
+                }`}>
+                  {usuario.estadoMembresia || 'NINGUNO'}
+                </span>
+              </td>
               <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                <button 
-                  onClick={() => handleOpenForm(usuario)}
-                  className="text-blue-600 hover:text-blue-900"
-                >
-                  Editar
-                </button>
-                <button 
-                  onClick={() => handleOpenDelete(usuario)}
-                  className="text-red-600 hover:text-red-900"
-                >
-                  Eliminar
-                </button>
+                {usuario.estadoMembresia === 'PENDIENTE' && (
+                  <>
+                    <button onClick={() => handleUpdateMembresia(usuario.idUsuario, 'APROBADO')} className="text-green-600 hover:text-green-900">Aprobar</button>
+                    <button onClick={() => handleUpdateMembresia(usuario.idUsuario, 'RECHAZADO')} className="text-red-600 hover:text-red-900">Rechazar</button>
+                  </>
+                )}
+                <button onClick={() => handleOpenForm(usuario)} className="text-blue-600 hover:text-blue-900">Editar</button>
+                <button onClick={() => handleOpenDelete(usuario)} className="text-red-600 hover:text-red-900">Eliminar</button>
               </td>
             </tr>
           ))}
         </Table>
       )}
 
-      
-      <Modal 
-        isOpen={isFormOpen} 
-        onClose={() => setIsFormOpen(false)}
-        title={selectedUser ? 'Editar Usuario' : 'Nuevo Usuario'}
-      >
-        <UsuarioForm 
-          initialData={selectedUser}
-          onSubmit={handleFormSubmit}
-          onCancel={() => setIsFormOpen(false)}
-        />
+      <Modal isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} title={selectedUser ? 'Editar Usuario' : 'Nuevo Usuario'}>
+        <UsuarioForm initialData={selectedUser} onSubmit={handleFormSubmit} onCancel={() => setIsFormOpen(false)} />
       </Modal>
 
-      
-      <ConfirmModal
-        isOpen={isDeleteOpen}
-        onClose={() => setIsDeleteOpen(false)}
-        onConfirm={handleConfirmDelete}
-        title="Eliminar Usuario"
-        message={`¿Estás seguro de que deseas eliminar al usuario "${selectedUser?.nombre}"? Esta acción no se puede deshacer.`}
-        confirmText="Eliminar"
-      />
+      <ConfirmModal isOpen={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} onConfirm={handleConfirmDelete} title="Eliminar Usuario" message={`¿Estás seguro de que deseas eliminar al usuario "${selectedUser?.nombre}"? Esta acción no se puede deshacer.`} confirmText="Eliminar" />
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getOrganizaciones, deleteOrganizacion, createOrganizacion, updateOrganizacion } from '../../services/organizacionService';
+import { getOrganizaciones, deleteOrganizacion, createOrganizacion, updateOrganizacion, updateOrganizacionEstado } from '../../services/organizacionService';
 import Table from '../../components/Table';
 import Button from '../../components/Button';
 import Modal from '../../components/Modal';
@@ -10,7 +10,6 @@ const Organizaciones = () => {
   const [organizaciones, setOrganizaciones] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
   
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -30,8 +29,8 @@ const Organizaciones = () => {
       console.error("Error fetching organizaciones:", err);
       setError("No se pudieron cargar las organizaciones.");
       setOrganizaciones([
-        { idOrganizacion: 1, nombreOrganizacion: 'Refugio San Francisco (Mock)', direccion: 'Av. Siempre Viva 123', telefono: '555-0101' },
-        { idOrganizacion: 2, nombreOrganizacion: 'Patitas Felices (Mock)', direccion: 'Calle Falsa 456', telefono: '555-0202' },
+        { idOrganizacion: 1, nombreOrganizacion: 'Refugio San Francisco (Mock)', direccion: 'Av. Siempre Viva 123', telefono: '555-0101', estado: 'ACTIVA' },
+        { idOrganizacion: 2, nombreOrganizacion: 'Patitas Felices (Mock)', direccion: 'Calle Falsa 456', telefono: '555-0202', estado: 'PENDIENTE' },
       ]);
     } finally {
       setLoading(false);
@@ -72,6 +71,15 @@ const Organizaciones = () => {
     }
   };
 
+  const handleUpdateEstado = async (id, estado) => {
+    try {
+      await updateOrganizacionEstado(id, estado);
+      fetchOrganizaciones();
+    } catch (err) {
+      alert("Error al actualizar estado");
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -90,54 +98,38 @@ const Organizaciones = () => {
       {loading ? (
         <div className="text-center py-10">Cargando organizaciones...</div>
       ) : (
-        <Table headers={['ID', 'Nombre', 'Dirección', 'Teléfono', 'Acciones']}>
+        <Table headers={['ID', 'Nombre', 'Dirección', 'Teléfono', 'Estado', 'Acciones']}>
           {organizaciones.map((org) => (
             <tr key={org.idOrganizacion}>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{org.idOrganizacion}</td>
               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{org.nombreOrganizacion}</td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{org.direccion}</td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{org.telefono}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${org.estado === 'ACTIVA' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                  {org.estado || 'ACTIVA'}
+                </span>
+              </td>
               <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                <button 
-                  onClick={() => handleOpenForm(org)}
-                  className="text-blue-600 hover:text-blue-900"
-                >
-                  Editar
-                </button>
-                <button 
-                  onClick={() => handleOpenDelete(org)}
-                  className="text-red-600 hover:text-red-900"
-                >
-                  Eliminar
-                </button>
+                {org.estado === 'PENDIENTE' && (
+                  <>
+                    <button onClick={() => handleUpdateEstado(org.idOrganizacion, 'ACTIVA')} className="text-green-600 hover:text-green-900">Aprobar</button>
+                    <button onClick={() => handleUpdateEstado(org.idOrganizacion, 'RECHAZADA')} className="text-red-600 hover:text-red-900">Rechazar</button>
+                  </>
+                )}
+                <button onClick={() => handleOpenForm(org)} className="text-blue-600 hover:text-blue-900">Editar</button>
+                <button onClick={() => handleOpenDelete(org)} className="text-red-600 hover:text-red-900">Eliminar</button>
               </td>
             </tr>
           ))}
         </Table>
       )}
 
-      
-      <Modal 
-        isOpen={isFormOpen} 
-        onClose={() => setIsFormOpen(false)}
-        title={selectedOrg ? 'Editar Organización' : 'Nueva Organización'}
-      >
-        <OrganizacionForm 
-          initialData={selectedOrg}
-          onSubmit={handleFormSubmit}
-          onCancel={() => setIsFormOpen(false)}
-        />
+      <Modal isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} title={selectedOrg ? 'Editar Organización' : 'Nueva Organización'}>
+        <OrganizacionForm initialData={selectedOrg} onSubmit={handleFormSubmit} onCancel={() => setIsFormOpen(false)} />
       </Modal>
 
-      
-      <ConfirmModal
-        isOpen={isDeleteOpen}
-        onClose={() => setIsDeleteOpen(false)}
-        onConfirm={handleConfirmDelete}
-        title="Eliminar Organización"
-        message={`¿Estás seguro de que deseas eliminar la organización "${selectedOrg?.nombreOrganizacion}"? Esta acción no se puede deshacer.`}
-        confirmText="Eliminar"
-      />
+      <ConfirmModal isOpen={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} onConfirm={handleConfirmDelete} title="Eliminar Organización" message={`¿Estás seguro de que deseas eliminar la organización "${selectedOrg?.nombreOrganizacion}"? Esta acción no se puede deshacer.`} confirmText="Eliminar" />
     </div>
   );
 };

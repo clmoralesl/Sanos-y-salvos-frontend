@@ -26,3 +26,8 @@ export const deleteOrganizacion = async (id) => {
   const response = await api.delete(`${PREFIX}/${id}`);
   return response.data;
 };
+
+export const updateOrganizacionEstado = async (id, estado) => {
+  const response = await api.put(`${PREFIX}/${id}/estado?estado=${estado}`);
+  return response.data;
+};
