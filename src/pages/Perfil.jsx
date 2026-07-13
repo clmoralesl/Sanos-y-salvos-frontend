@@ -335,92 +335,116 @@ const Perfil = () => {
           <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-4">
             <h3 className="text-lg font-bold text-slate-800 border-b pb-2">Filiación Institucional</h3>
 
-            <label className="flex items-center space-x-3 cursor-pointer py-1">
-              <input
-                type="checkbox"
-                checked={perteneceOrg}
-                onChange={(e) => setPerteneceOrg(e.target.checked)}
-                className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 border-gray-300"
-              />
-              <span className="text-sm font-medium text-slate-700">Pertenezco a una Organización o Refugio</span>
-            </label>
-
-            {perteneceOrg && (
-              <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
-                <div className="flex space-x-4 mb-2">
-                  <label className="flex items-center space-x-2 cursor-pointer text-xs font-semibold text-slate-700">
-                    <input
-                      type="radio"
-                      name="orgMode"
-                      value="select"
-                      checked={orgMode === 'select'}
-                      onChange={() => setOrgMode('select')}
-                      className="text-blue-600 focus:ring-blue-500"
-                    />
-                    <span>Seleccionar existente</span>
-                  </label>
-                  <label className="flex items-center space-x-2 cursor-pointer text-xs font-semibold text-slate-700">
-                    <input
-                      type="radio"
-                      name="orgMode"
-                      value="create"
-                      checked={orgMode === 'create'}
-                      onChange={() => setOrgMode('create')}
-                      className="text-blue-600 focus:ring-blue-500"
-                    />
-                    <span>Registrar nueva</span>
-                  </label>
-                </div>
-
-                {orgMode === 'select' ? (
+            {idOrganizacion ? (
+              <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                   <div>
-                    <label className="block text-xs font-bold text-slate-600 mb-1">Elige tu Organización</label>
-                    <select
-                      value={idOrganizacion}
-                      onChange={(e) => setIdOrganizacion(e.target.value)}
-                      className="w-full bg-white text-slate-800 border border-slate-350 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-sm font-semibold bg-white"
-                    >
-                      <option value="">-- Elige una organización --</option>
-                      {organizaciones.map(o => (
-                        <option key={o.idOrganizacion} value={o.idOrganizacion}>{o.nombreOrganizacion}</option>
-                      ))}
-                    </select>
+                    <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Nombre Organización</span>
+                    <span className="font-bold text-slate-800 text-base">{organizaciones.find(o => o.idOrganizacion.toString() === idOrganizacion.toString())?.nombreOrganizacion || 'No disponible'}</span>
                   </div>
-                ) : (
-                  <div className="space-y-3">
-                    <div>
-                      <label className="block text-xs font-bold text-slate-600 mb-1">Nombre</label>
-                      <input
-                        type="text"
-                        value={orgNombre}
-                        onChange={(e) => setOrgNombre(e.target.value)}
-                        className="w-full bg-white text-slate-800 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
-                        placeholder="Ej: Patitas Felices"
-                      />
+                  <div>
+                    <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">RUT</span>
+                    <span className="font-semibold text-slate-700 text-base">{organizaciones.find(o => o.idOrganizacion.toString() === idOrganizacion.toString())?.rut || 'N/A'}</span>
+                  </div>
+                  <div className="md:col-span-2">
+                    <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Dirección</span>
+                    <span className="font-semibold text-slate-700 text-base">{organizaciones.find(o => o.idOrganizacion.toString() === idOrganizacion.toString())?.direccion || 'N/A'}</span>
+                  </div>
+                </div>
+                <p className="text-xs text-amber-600 font-bold mt-4 pt-4 border-t border-slate-200">
+                  Ya perteneces a una organización. No puedes registrar o unirte a otra simultáneamente.
+                </p>
+              </div>
+            ) : (
+              <>
+                <label className="flex items-center space-x-3 cursor-pointer py-1">
+                  <input
+                    type="checkbox"
+                    checked={perteneceOrg}
+                    onChange={(e) => setPerteneceOrg(e.target.checked)}
+                    className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 border-gray-300"
+                  />
+                  <span className="text-sm font-medium text-slate-700">Pertenezco a una Organización o Refugio</span>
+                </label>
+
+                {perteneceOrg && (
+                  <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
+                    <div className="flex space-x-4 mb-2">
+                      <label className="flex items-center space-x-2 cursor-pointer text-xs font-semibold text-slate-700">
+                        <input
+                          type="radio"
+                          name="orgMode"
+                          value="select"
+                          checked={orgMode === 'select'}
+                          onChange={() => setOrgMode('select')}
+                          className="text-blue-600 focus:ring-blue-500"
+                        />
+                        <span>Seleccionar existente</span>
+                      </label>
+                      <label className="flex items-center space-x-2 cursor-pointer text-xs font-semibold text-slate-700">
+                        <input
+                          type="radio"
+                          name="orgMode"
+                          value="create"
+                          checked={orgMode === 'create'}
+                          onChange={() => setOrgMode('create')}
+                          className="text-blue-600 focus:ring-blue-500"
+                        />
+                        <span>Registrar nueva</span>
+                      </label>
                     </div>
-                    <div>
-                      <label className="block text-xs font-bold text-slate-600 mb-1">Dirección</label>
-                      <input
-                        type="text"
-                        value={orgDireccion}
-                        onChange={(e) => setOrgDireccion(e.target.value)}
-                        className="w-full bg-white text-slate-800 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
-                        placeholder="Ej: Calle Nueva 123"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-slate-600 mb-1">Teléfono</label>
-                      <input
-                        type="text"
-                        value={orgTelefono}
-                        onChange={(e) => setOrgTelefono(e.target.value)}
-                        className="w-full bg-white text-slate-800 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
-                        placeholder="Ej: +5699999999"
-                      />
-                    </div>
+
+                    {orgMode === 'select' ? (
+                      <div>
+                        <label className="block text-xs font-bold text-slate-600 mb-1">Elige tu Organización</label>
+                        <select
+                          value={idOrganizacion}
+                          onChange={(e) => setIdOrganizacion(e.target.value)}
+                          className="w-full bg-white text-slate-800 border border-slate-350 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-sm font-semibold bg-white"
+                        >
+                          <option value="">-- Elige una organización --</option>
+                          {organizaciones.map(o => (
+                            <option key={o.idOrganizacion} value={o.idOrganizacion}>{o.nombreOrganizacion}</option>
+                          ))}
+                        </select>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        <div>
+                          <label className="block text-xs font-bold text-slate-600 mb-1">Nombre</label>
+                          <input
+                            type="text"
+                            value={orgNombre}
+                            onChange={(e) => setOrgNombre(e.target.value)}
+                            className="w-full bg-white text-slate-800 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+                            placeholder="Ej: Patitas Felices"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-600 mb-1">Dirección</label>
+                          <input
+                            type="text"
+                            value={orgDireccion}
+                            onChange={(e) => setOrgDireccion(e.target.value)}
+                            className="w-full bg-white text-slate-800 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+                            placeholder="Ej: Calle Nueva 123"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-600 mb-1">Teléfono</label>
+                          <input
+                            type="text"
+                            value={orgTelefono}
+                            onChange={(e) => setOrgTelefono(e.target.value)}
+                            className="w-full bg-white text-slate-800 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+                            placeholder="Ej: +5699999999"
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
-              </div>
+              </>
             )}
           </div>
 

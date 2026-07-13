@@ -48,6 +48,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
             <Route path="reportes/:id" element={<ReporteDetalle />} />
             <Route path="perfil" element={<Perfil />} />
             <Route path="mis-reportes" element={<MisReportes />} />
+            <Route path="mi-organizacion" element={<MiOrganizacion />} />
           </Route>
 
           <Route path="/admin" element={<AdminLayout />}>
@@ -58,7 +59,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
             <Route path="reportes/:id" element={<AdminReporteDetalle />} />
             <Route path="organizaciones" element={<Organizaciones />} />
             <Route path="solicitudes-org" element={<SolicitudesOrganizaciones />} />
-            <Route path="mi-organizacion" element={<MiOrganizacion />} />
           </Route>
 
           <Route path="*" element={<div className="h-screen flex items-center justify-center">404 - Página no encontrada</div>} />
