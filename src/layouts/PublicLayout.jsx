@@ -17,10 +17,9 @@ const PublicLayout = () => {
       try {
         const profile = await getMe();
         setDbProfile(profile);
-        const photo = localStorage.getItem(`user_profile_photo_${profile.idUsuario}`);
-        if (photo) {
-          setProfilePhoto(photo);
-        }
+         if (profile.urlFotoPerfil) {
+           setProfilePhoto(profile.urlFotoPerfil);
+         }
       } catch (error) {
         if (error.response && error.response.status === 404) {
           navigate('/registro');

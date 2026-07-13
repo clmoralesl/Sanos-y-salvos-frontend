@@ -23,9 +23,8 @@ const AdminLayout = () => {
           setUserName(profile.nombre);
           setDbProfile(profile);
           
-          const photo = localStorage.getItem(`user_profile_photo_${profile.idUsuario}`);
-          if (photo) {
-            setProfilePhoto(photo);
+          if (profile.urlFotoPerfil) {
+            setProfilePhoto(profile.urlFotoPerfil);
           }
 
           // ONLY SUPER_ADMIN allowed
