@@ -18,6 +18,7 @@ const Onboarding = () => {
   const [orgNombre, setOrgNombre] = useState('');
   const [orgDireccion, setOrgDireccion] = useState('');
   const [orgTelefono, setOrgTelefono] = useState('');
+  const [orgEmail, setOrgEmail] = useState('');
   const [orgRut, setOrgRut] = useState('');
   const [orgRutRepresentante, setOrgRutRepresentante] = useState('');
 
@@ -86,8 +87,8 @@ const Onboarding = () => {
       if (perteneceOrg) {
         finalTipoCuenta = 2; 
         if (orgMode === 'create') {
-          if (!orgNombre.trim() || !orgRut.trim() || !orgRutRepresentante.trim()) {
-            setErrorMsg('El nombre, el RUT de la organización y tu RUT como representante son obligatorios.');
+          if (!orgNombre.trim() || !orgRut.trim() || !orgRutRepresentante.trim() || !orgEmail.trim() || !orgTelefono.trim()) {
+            setErrorMsg('Todos los campos de la organización, incluyendo correo y teléfono de contacto, son obligatorios.');
             setLoadingSubmit(false);
             return;
           }
@@ -95,6 +96,7 @@ const Onboarding = () => {
             nombreOrganizacion: orgNombre,
             direccion: orgDireccion,
             telefono: orgTelefono,
+            email: orgEmail,
             rut: orgRut,
             rutRepresentante: orgRutRepresentante
           });
@@ -253,42 +255,20 @@ const Onboarding = () => {
                       onChange={(e) => setOrgNombre(e.target.value)}
                       className="w-full bg-white text-slate-800 rounded-xl border border-slate-300 px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
                       placeholder="Ej: Patitas Felices"
+                      required
                     />
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-slate-600 mb-1">
-                      Dirección de la Organización
+                      Correo Electrónico (Contacto)
                     </label>
                     <input
-                      type="text"
-                      value={orgDireccion}
-                      onChange={(e) => setOrgDireccion(e.target.value)}
+                      type="email"
+                      value={orgEmail}
+                      onChange={(e) => setOrgEmail(e.target.value)}
                       className="w-full bg-white text-slate-800 rounded-xl border border-slate-300 px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
-                      placeholder="Ej: Av. Providencia 123"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-600 mb-1">
-                      RUT de la Organización
-                    </label>
-                    <input
-                      type="text"
-                      value={orgRut}
-                      onChange={(e) => setOrgRut(e.target.value)}
-                      className="w-full bg-white text-slate-800 rounded-xl border border-slate-300 px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
-                      placeholder="Ej: 70.123.456-7"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-600 mb-1">
-                      Tu RUT (como representante legal)
-                    </label>
-                    <input
-                      type="text"
-                      value={orgRutRepresentante}
-                      onChange={(e) => setOrgRutRepresentante(e.target.value)}
-                      className="w-full bg-white text-slate-800 rounded-xl border border-slate-300 px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
-                      placeholder="Ej: 12.345.678-9"
+                      placeholder="Ej: contacto@patitas.cl"
+                      required
                     />
                   </div>
                   <div>
@@ -301,6 +281,46 @@ const Onboarding = () => {
                       onChange={(e) => setOrgTelefono(e.target.value)}
                       className="w-full bg-white text-slate-800 rounded-xl border border-slate-300 px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
                       placeholder="Ej: +56912345678"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-600 mb-1">
+                      Dirección de la Organización
+                    </label>
+                    <input
+                      type="text"
+                      value={orgDireccion}
+                      onChange={(e) => setOrgDireccion(e.target.value)}
+                      className="w-full bg-white text-slate-800 rounded-xl border border-slate-300 px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+                      placeholder="Ej: Av. Providencia 123"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-600 mb-1">
+                      RUT de la Organización
+                    </label>
+                    <input
+                      type="text"
+                      value={orgRut}
+                      onChange={(e) => setOrgRut(e.target.value)}
+                      className="w-full bg-white text-slate-800 rounded-xl border border-slate-300 px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+                      placeholder="Ej: 70.123.456-7"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-600 mb-1">
+                      Tu RUT (como representante legal)
+                    </label>
+                    <input
+                      type="text"
+                      value={orgRutRepresentante}
+                      onChange={(e) => setOrgRutRepresentante(e.target.value)}
+                      className="w-full bg-white text-slate-800 rounded-xl border border-slate-300 px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500"
+                      placeholder="Ej: 12.345.678-9"
+                      required
                     />
                   </div>
                 </div>
