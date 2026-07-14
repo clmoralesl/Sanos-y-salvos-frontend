@@ -4,7 +4,7 @@ const PREFIX = '/mascotas/v1/organizaciones';
 
 export const getOrganizaciones = async () => {
   const response = await api.get(PREFIX);
-  return response.data;
+  return Array.isArray(response.data) ? response.data : [];
 };
 
 export const getOrganizacionById = async (id) => {

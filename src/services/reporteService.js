@@ -4,8 +4,9 @@ const PREFIX = '/mascotas/v1/reportes';
 
 export const getReportes = async () => {
   const response = await api.get(PREFIX);
-  return response.data;
+  return Array.isArray(response.data) ? response.data : [];
 };
+
 
 export const getReporteById = async (id) => {
   const response = await api.get(`${PREFIX}/${id}`);

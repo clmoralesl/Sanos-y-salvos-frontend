@@ -4,12 +4,12 @@ const PREFIX = '/mascotas/v1/mascotas';
 
 export const getMascotas = async () => {
   const response = await api.get(PREFIX);
-  return response.data;
+  return Array.isArray(response.data) ? response.data : [];
 };
 
 export const getMisMascotas = async () => {
   const response = await api.get(`${PREFIX}/me`);
-  return response.data;
+  return Array.isArray(response.data) ? response.data : [];
 };
 
 export const getMascotaById = async (id) => {

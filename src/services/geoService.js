@@ -19,12 +19,12 @@ export const getUbicacionById = async (id) => {
 
 export const getRegiones = async () => {
   const response = await api.get('/geo/v1/catalogos-geo/regiones');
-  return response.data;
+  return Array.isArray(response.data) ? response.data : [];
 };
 
 export const getComunasPorRegion = async (idRegion) => {
   const response = await api.get(`/geo/v1/catalogos-geo/regiones/${idRegion}/comunas`);
-  return response.data;
+  return Array.isArray(response.data) ? response.data : [];
 };
 
 export const reverseGeocode = async (lat, lng) => {

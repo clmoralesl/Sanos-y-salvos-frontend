@@ -24,7 +24,7 @@ export const registrarUsuario = async (userData) => {
 
 export const getUsuarios = async () => {
   const response = await api.get(PREFIX);
-  return response.data;
+  return Array.isArray(response.data) ? response.data : [];
 };
 
 export const updateUsuarioMembresia = async (id, estado) => {

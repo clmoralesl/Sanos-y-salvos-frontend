@@ -2,7 +2,7 @@ import api from './api';
 
 export const getNotificaciones = async (idUsuario, soloNoLeidas = false) => {
   const response = await api.get(`/notificaciones/v1/notificaciones/usuario/${idUsuario}?soloNoLeidas=${soloNoLeidas}`);
-  return response.data;
+  return Array.isArray(response.data) ? response.data : [];
 };
 
 export const marcarNotificacionLeida = async (idNotificacion) => {
