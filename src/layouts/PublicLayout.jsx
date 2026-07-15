@@ -6,14 +6,16 @@ import { getMe } from '../services/usuarioService';
 import NotificationBell from '../components/NotificationBell';
 
 const PublicLayout = () => {
-  const { loginWithRedirect, logout, user: auth0User, isAuthenticated, getAccessTokenSilently } = useAuth0();
+  const { loginWithRedirect, logout, user: auth0User, isAuthenticated, getAccessTokenSilently, isLoading: authLoading } = useAuth0();
   const [localUser, setLocalUser] = useState(null);
   const navigate = useNavigate();
   const [dbProfile, setDbProfile] = useState(null);
   const [profilePhoto, setProfilePhoto] = useState('');
+  const [isProfileLoading, setIsProfileLoading] = useState(true); // Start true to prevent initial flash
 
   useEffect(() => {
     const loadProfileData = async () => {
+      setIsProfileLoading(true);
       try {
         const profile = await getMe();
         setDbProfile(profile);
@@ -24,8 +26,12 @@ const PublicLayout = () => {
         if (error.response && error.response.status === 404) {
           navigate('/registro');
         }
+      } finally {
+        setIsProfileLoading(false);
       }
     };
+
+    if (authLoading) return; // Wait for Auth0 to finish
 
     if (isAuthenticated) {
       setupInterceptors(getAccessTokenSilently);
@@ -39,15 +45,25 @@ const PublicLayout = () => {
         setLocalUser(null);
         setDbProfile(null);
         setProfilePhoto('');
+        setIsProfileLoading(false);
       }
     }
-  }, [isAuthenticated, getAccessTokenSilently, navigate]);
+  }, [isAuthenticated, getAccessTokenSilently, navigate, authLoading]);
 
   useEffect(() => {
     if (auth0User) {
       console.log("Auth0 User details:", auth0User);
     }
   }, [auth0User]);
+
+  if (authLoading || isProfileLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <p className="mt-4 text-gray-600 font-medium">Verificando sesión...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
