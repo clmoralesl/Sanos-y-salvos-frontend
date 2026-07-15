@@ -99,7 +99,7 @@ const PublicLayout = () => {
               <div className="flex items-center space-x-3 text-sm">
                 <span className="bg-slate-100 text-slate-700 px-3 py-1.5 rounded-lg font-medium border border-gray-200 flex items-center space-x-2">
                   {(profilePhoto && profilePhoto !== 'null') ? (
-                    <img src={profilePhoto} alt="Avatar" className="w-5 h-5 rounded-full object-cover" />
+                    <img src={profilePhoto} alt="Avatar" className="w-5 h-5 rounded-full object-cover" onError={(e) => { e.target.onerror = null; e.target.src = '/Default_pfp.jpg'; }} />
                   ) : (
                     <img src="/Default_pfp.jpg" alt="Avatar" className="w-5 h-5 rounded-full object-cover" />
                   )}
@@ -117,7 +117,7 @@ const PublicLayout = () => {
               <div className="flex items-center space-x-3 text-sm">
                 <span className="bg-slate-100 text-slate-700 px-3 py-1.5 rounded-lg font-medium border border-gray-200 flex items-center space-x-2">
                   {(profilePhoto && profilePhoto !== 'null') ? (
-                    <img src={profilePhoto} alt="Avatar" className="w-5 h-5 rounded-full object-cover" />
+                    <img src={profilePhoto} alt="Avatar" className="w-5 h-5 rounded-full object-cover" onError={(e) => { e.target.onerror = null; e.target.src = '/Default_pfp.jpg'; }} />
                   ) : (
                     <img src="/Default_pfp.jpg" alt="Avatar" className="w-5 h-5 rounded-full object-cover" />
                   )}

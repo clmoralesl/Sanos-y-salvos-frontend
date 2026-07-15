@@ -315,6 +315,7 @@ const Perfil = () => {
               src={(profilePhoto && profilePhoto !== 'null') ? profilePhoto : '/Default_pfp.jpg'}
               alt="Avatar"
               className="w-full h-full object-cover"
+              onError={(e) => { e.target.onerror = null; e.target.src = '/Default_pfp.jpg'; }}
             />
           </div>
           <div className="w-full text-center">
