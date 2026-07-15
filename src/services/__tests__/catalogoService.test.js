@@ -48,5 +48,63 @@ describe('catalogoService', () => {
     expect(api.get).toHaveBeenCalledWith('/mascotas/v1/catalogos/especies');
     expect(result).toEqual(['Perro']);
   });
+  it('debe obtener características', async () => {
+    api.get.mockResolvedValue({ data: ['Vacunado'] });
+
+    const result = await getCaracteristicas();
+
+    expect(api.get).toHaveBeenCalledWith('/mascotas/v1/catalogos/caracteristicas');
+    expect(result).toEqual(['Vacunado']);
+  });
+
+  it('debe obtener tipos de reporte', async () => {
+    api.get.mockResolvedValue({ data: ['Perdido'] });
+
+    const result = await getTiposReporte();
+
+    expect(api.get).toHaveBeenCalledWith('/mascotas/v1/catalogos/tipos-reporte');
+    expect(result).toEqual(['Perdido']);
+  });
+
+  it('debe devolver un arreglo vacío cuando razas no retorna un arreglo', async () => {
+    api.get.mockResolvedValue({ data: null });
+
+    const result = await getRazas();
+
+    expect(result).toEqual([]);
+  });
+
+  it('debe devolver un arreglo vacío cuando tamaños no retorna un arreglo', async () => {
+    api.get.mockResolvedValue({ data: {} });
+
+    const result = await getTamanios();
+
+    expect(result).toEqual([]);
+  });
+
+  it('debe devolver un arreglo vacío cuando características no retorna un arreglo', async () => {
+    api.get.mockResolvedValue({ data: undefined });
+
+    const result = await getCaracteristicas();
+
+    expect(result).toEqual([]);
+  });
+
+  it('debe devolver un arreglo vacío cuando tipos de reporte no retorna un arreglo', async () => {
+    api.get.mockResolvedValue({ data: 'texto' });
+
+    const result = await getTiposReporte();
+
+    expect(result).toEqual([]);
+  });
+
+  it('debe devolver un arreglo vacío cuando especies no retorna un arreglo', async () => {
+    api.get.mockResolvedValue({ data: 123 });
+
+    const result = await getEspecies();
+
+    expect(result).toEqual([]);
+  });
+
 
 });

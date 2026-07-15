@@ -80,6 +80,23 @@ describe('reporteService', () => {
 
     expect(api.delete).toHaveBeenCalledWith('/mascotas/v1/reportes/5');
     expect(result).toEqual({ ok: true });
+    
   });
+  it('debe eliminar un reporte', async () => {
+  api.delete.mockResolvedValue({ data: { ok: true } });
+
+  const result = await deleteReporte(5);
+
+  expect(api.delete).toHaveBeenCalledWith('/mascotas/v1/reportes/5');
+  expect(result).toEqual({ ok: true });
+});
+
+it('debe devolver un arreglo vacío cuando la respuesta no contiene una lista', async () => {
+  api.get.mockResolvedValue({ data: null });
+
+  const result = await getReportes();
+
+  expect(result).toEqual([]);
+});
 
 });
