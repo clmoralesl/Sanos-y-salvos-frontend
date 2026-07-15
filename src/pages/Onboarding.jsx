@@ -7,7 +7,7 @@ import { formatRut, filterPhoneDigits, buildPhone, validateRut } from '../utils/
 
 const Onboarding = () => {
   const navigate = useNavigate();
-  const { user: auth0User, isAuthenticated, isLoading } = useAuth0();
+  const { user: auth0User, isAuthenticated, isLoading, logout } = useAuth0();
 
   const [nombre, setNombre] = useState('');
   const [telefonoDigits, setTelefonoDigits] = useState('');
@@ -462,6 +462,14 @@ const Onboarding = () => {
             className="w-full bg-blue-600 text-white py-3.5 rounded-xl font-bold hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-lg text-sm mt-4"
           >
             {loadingSubmit ? 'Guardando Registro...' : 'Completar Registro'}
+          </button>
+          
+          <button
+            type="button"
+            onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
+            className="w-full bg-slate-100 text-slate-600 border border-slate-300 py-3.5 rounded-xl font-bold hover:bg-slate-200 transition text-sm mt-3"
+          >
+            Volver al Login (Cerrar sesión)
           </button>
         </form>
       </div>
