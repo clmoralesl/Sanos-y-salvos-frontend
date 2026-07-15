@@ -312,7 +312,7 @@ const Perfil = () => {
               <div className="absolute inset-0 bg-white/80 flex items-center justify-center text-xs font-bold text-blue-600 animate-pulse">Subiendo...</div>
             ) : null}
             <img
-              src={profilePhoto || '/Default_pfp.jpg'}
+              src={(profilePhoto && profilePhoto !== 'null') ? profilePhoto : '/Default_pfp.jpg'}
               alt="Avatar"
               className="w-full h-full object-cover"
             />

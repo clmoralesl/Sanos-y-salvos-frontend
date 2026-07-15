@@ -129,7 +129,7 @@ const AdminLayout = () => {
             </div>
             <NotificationBell dbProfile={dbProfile} />
             <div className="w-10 h-10 rounded-full bg-slate-200 border-2 border-white shadow-sm overflow-hidden flex items-center justify-center text-xl">
-              {profilePhoto ? <img src={profilePhoto} alt="Perfil" className="w-full h-full object-cover" /> : <img src="/Default_pfp.jpg" alt="Perfil" className="w-full h-full object-cover" />}
+              {(profilePhoto && profilePhoto !== 'null') ? <img src={profilePhoto} alt="Perfil" className="w-full h-full object-cover" /> : <img src="/Default_pfp.jpg" alt="Perfil" className="w-full h-full object-cover" />}
             </div>
           </div>
         </header>
