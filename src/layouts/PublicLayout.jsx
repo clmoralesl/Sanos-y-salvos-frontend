@@ -101,7 +101,7 @@ const PublicLayout = () => {
                   {profilePhoto ? (
                     <img src={profilePhoto} alt="Avatar" className="w-5 h-5 rounded-full object-cover" />
                   ) : (
-                    <span>👤</span>
+                    <img src="/Default_pfp.jpg" alt="Avatar" className="w-5 h-5 rounded-full object-cover" />
                   )}
                   <span>{dbProfile?.nombre || auth0User?.name || auth0User?.email}</span>
                 </span>
@@ -119,7 +119,7 @@ const PublicLayout = () => {
                   {profilePhoto ? (
                     <img src={profilePhoto} alt="Avatar" className="w-5 h-5 rounded-full object-cover" />
                   ) : (
-                    <span>👤</span>
+                    <img src="/Default_pfp.jpg" alt="Avatar" className="w-5 h-5 rounded-full object-cover" />
                   )}
                   <span>{dbProfile?.nombre || localUser.name} (Local)</span>
                 </span>
