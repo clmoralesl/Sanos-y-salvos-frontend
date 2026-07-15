@@ -1,20 +1,19 @@
-import { render, screen, fireEvent, cleanup } from '@testing-library/react';
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import ConfirmModal from '../ConfirmModal';
 
 afterEach(cleanup);
 
 describe('ConfirmModal', () => {
-
   it('debe mostrar el mensaje recibido', () => {
     render(
       <ConfirmModal
-        isOpen={true}
+        isOpen
         title="Eliminar"
         message="¿Desea eliminar?"
         onClose={() => {}}
         onConfirm={() => {}}
-      />
+      />,
     );
 
     expect(screen.getByText('¿Desea eliminar?')).toBeDefined();
@@ -26,12 +25,12 @@ describe('ConfirmModal', () => {
 
     render(
       <ConfirmModal
-        isOpen={true}
+        isOpen
         title="Eliminar"
         message="¿Desea eliminar?"
         onClose={onClose}
         onConfirm={onConfirm}
-      />
+      />,
     );
 
     fireEvent.click(screen.getByText('Confirmar'));
@@ -41,20 +40,20 @@ describe('ConfirmModal', () => {
   });
 
   it('debe renderizar como primario si type no es danger', () => {
-    const { container } = render(
+    render(
       <ConfirmModal
-        isOpen={true}
+        isOpen
         title="Aceptar"
         message="¿Aceptar?"
         type="primary"
         confirmText="OK"
         onClose={() => {}}
         onConfirm={() => {}}
-      />
+      />,
     );
 
-    const btn = screen.getByText('OK');
-    expect(btn.className).toContain('bg-blue-600');
-  });
+    const button = screen.getByText('OK');
 
+    expect(button.className).toContain('bg-blue-600');
+  });
 });

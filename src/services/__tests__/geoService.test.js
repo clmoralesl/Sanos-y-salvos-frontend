@@ -100,7 +100,7 @@ describe('geoService', () => {
   });
 
   it('realiza geocodificación inversa correctamente', async () => {
-    global.fetch = vi.fn().mockResolvedValue({
+    globalThis.fetch = vi.fn().mockResolvedValue({
       json: vi.fn().mockResolvedValue({
         address: {
           city: 'Viña del Mar',
@@ -113,7 +113,7 @@ describe('geoService', () => {
 
     const resultado = await reverseGeocode(-33.01, -71.55);
 
-    expect(global.fetch).toHaveBeenCalledWith(
+    expect(globalThis.fetch).toHaveBeenCalledWith(
       'https://nominatim.openstreetmap.org/reverse?format=json&lat=-33.01&lon=-71.55&zoom=18'
     );
 
@@ -125,7 +125,7 @@ describe('geoService', () => {
   });
 
   it('utiliza valores alternativos cuando faltan datos geográficos', async () => {
-    global.fetch = vi.fn().mockResolvedValue({
+    globalThis.fetch = vi.fn().mockResolvedValue({
       json: vi.fn().mockResolvedValue({
         address: {
           suburb: 'Sector Norte'
@@ -153,7 +153,7 @@ describe('geoService', () => {
     expect(resultado).toBeNull();
   });
   it('debe utilizar town y la calle cuando no existe ciudad ni número', async () => {
-  global.fetch = vi.fn().mockResolvedValue({
+  globalThis.fetch = vi.fn().mockResolvedValue({
     json: vi.fn().mockResolvedValue({
       address: {
         town: 'Quilpué',
