@@ -119,8 +119,7 @@ const MiOrganizacion = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        {/* COLUMNA IZQUIERDA: DATOS DE ORG */}
+
         <div className="lg:col-span-1 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm h-fit space-y-4">
           <h3 className="text-lg font-bold text-slate-800 border-b pb-2">
              Datos de Contacto
@@ -167,7 +166,6 @@ const MiOrganizacion = () => {
           </form>
         </div>
 
-        {/* COLUMNA DERECHA: VOLUNTARIOS Y SOLICITUDES */}
         <div className="lg:col-span-2 space-y-6">
           
           <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">

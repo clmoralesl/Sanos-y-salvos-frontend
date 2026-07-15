@@ -27,7 +27,6 @@ const AdminLayout = () => {
             setProfilePhoto(profile.urlFotoPerfil);
           }
 
-          // ONLY SUPER_ADMIN allowed
           const isSuperAdmin = (profile.descripcionTipoCuenta === 'SUPER_ADMIN') ||
                                (auth0User?.['https://sanosysalvos.cl/roles']?.includes('admin')) ||
                                (auth0User?.['https://sanosysalvos.cl/role'] === 'admin') ||
@@ -57,7 +56,7 @@ const AdminLayout = () => {
       if (user.role !== 'admin') {
         navigate('/');
       } else {
-        setUserRole('SUPER_ADMIN'); // mock role for local admin
+        setUserRole('SUPER_ADMIN');
         setUserName(user.name);
       }
     }
@@ -69,8 +68,7 @@ const AdminLayout = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row font-sans text-slate-800">
-      
-      {/* SIDEBAR LUMINOSO */}
+
       <aside className="w-full md:w-72 bg-white border-r border-slate-200 flex flex-col shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-10">
         <div className="p-6 border-b border-slate-100 flex items-center justify-between">
           <div>
@@ -112,10 +110,8 @@ const AdminLayout = () => {
         </div>
       </aside>
 
-      {/* CONTENIDO PRINCIPAL */}
       <div className="flex-grow flex flex-col overflow-hidden">
-        
-        {/* HEADER SUPERIOR */}
+
         <header className="bg-white h-20 px-8 flex items-center justify-between shadow-[0_4px_24px_rgba(0,0,0,0.02)] z-0">
           <div className="flex items-center gap-3">
              <span className="text-xl">✨</span>
@@ -134,7 +130,6 @@ const AdminLayout = () => {
           </div>
         </header>
 
-        {/* ÁREA DE TRABAJO */}
         <main className="flex-grow p-8 overflow-y-auto bg-slate-50/50">
           <div className="max-w-7xl mx-auto">
             <Outlet />

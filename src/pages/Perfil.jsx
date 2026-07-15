@@ -26,7 +26,6 @@ const Perfil = () => {
   const [idOrganizacion, setIdOrganizacion] = useState('');
   const [organizaciones, setOrganizaciones] = useState([]);
 
-  // States for banner
   const [estadoMembresia, setEstadoMembresia] = useState('');
   const [estadoOrganizacion, setEstadoOrganizacion] = useState('');
   const [descripcionTipoCuenta, setDescripcionTipoCuenta] = useState('');
@@ -47,7 +46,6 @@ const Perfil = () => {
   const [petToDelete, setPetToDelete] = useState(null);
   const [toast, setToast] = useState(null);
 
-  // Estados de error inline
   const [errors, setErrors] = useState({
     nombre: '',
     telefono: '',
@@ -96,7 +94,7 @@ const Perfil = () => {
         if (matched) {
           if (data.estadoMembresia === 'RECHAZADO') {
             setIdOrganizacion('');
-            setPerteneceOrg(false); // Let them choose whether to join a new one
+            setPerteneceOrg(false);
           } else {
             setIdOrganizacion(matched.idOrganizacion.toString());
           }
@@ -160,8 +158,7 @@ const Perfil = () => {
 
   const handleSave = async (e) => {
     e.preventDefault();
-    
-    // Reset errors
+
     const newErrors = {
       nombre: '',
       telefono: '',
@@ -405,7 +402,6 @@ const Perfil = () => {
           <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-4">
             <h3 className="text-lg font-bold text-slate-800 border-b pb-2">Filiación Institucional</h3>
 
-            {/* BANNER INFORMATIVO DE ESTADO */}
             <div className="mb-4">
               {perteneceOrg && descripcionTipoCuenta === 'ADMIN_ORG' && estadoOrganizacion === 'PENDIENTE' && (
                 <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 text-yellow-700 rounded-r-xl">

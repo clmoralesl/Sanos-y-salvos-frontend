@@ -49,7 +49,7 @@ const SolicitudesOrganizaciones = () => {
 
   const handleVerDetalles = (org) => {
     setSelectedOrg(org);
-    // Find the user who created this org (ADMIN_ORG)
+
     const orgCreator = usuarios.find(u => u.idOrganizacion === org.idOrganizacion && u.descripcionTipoCuenta === 'ADMIN_ORG');
     setCreador(orgCreator);
     setIsModalOpen(true);

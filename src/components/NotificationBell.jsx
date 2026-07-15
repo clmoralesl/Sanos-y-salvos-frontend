@@ -21,7 +21,7 @@ const NotificationBell = ({ dbProfile }) => {
 
   useEffect(() => {
     fetchNotificaciones();
-    // Optional: Poll every 30 seconds
+
     const interval = setInterval(fetchNotificaciones, 30000);
     return () => clearInterval(interval);
   }, [dbProfile]);

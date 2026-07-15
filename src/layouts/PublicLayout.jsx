@@ -11,7 +11,7 @@ const PublicLayout = () => {
   const navigate = useNavigate();
   const [dbProfile, setDbProfile] = useState(null);
   const [profilePhoto, setProfilePhoto] = useState('');
-  const [isProfileLoading, setIsProfileLoading] = useState(true); // Start true to prevent initial flash
+  const [isProfileLoading, setIsProfileLoading] = useState(true);
 
   useEffect(() => {
     const loadProfileData = async () => {
@@ -31,7 +31,7 @@ const PublicLayout = () => {
       }
     };
 
-    if (authLoading) return; // Wait for Auth0 to finish
+    if (authLoading) return;
 
     if (isAuthenticated) {
       setupInterceptors(getAccessTokenSilently);

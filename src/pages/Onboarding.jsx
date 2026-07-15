@@ -26,7 +26,6 @@ const Onboarding = () => {
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
-  // Estados de error inline
   const [errors, setErrors] = useState({
     nombre: '',
     telefono: '',
@@ -86,8 +85,7 @@ const Onboarding = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Reset errors
+
     const newErrors = {
       nombre: '',
       telefono: '',

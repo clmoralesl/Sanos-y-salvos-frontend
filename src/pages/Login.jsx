@@ -13,7 +13,7 @@ const Login = () => {
     if (isAuthenticated || user) {
       navigate('/');
     } else {
-      // Redirige a Auth0 directamente
+
       loginWithRedirect();
     }
   }, [isAuthenticated, isLoading, navigate, loginWithRedirect]);
